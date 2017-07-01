@@ -4,9 +4,9 @@
   
   <link href="/atom.xml" rel="self"/>
   
-  <link href="http://www.nineteen.com/"/>
+  <link href="http://www.nineteen.me/"/>
   <updated>2017-07-01T07:04:42.000Z</updated>
-  <id>http://www.nineteen.com/</id>
+  <id>http://www.nineteen.me/</id>
   
   <author>
     <name>郑祯</name>
@@ -17,8 +17,8 @@
   
   <entry>
     <title>Hello World</title>
-    <link href="http://www.nineteen.com/2017/07/01/hello-world/"/>
-    <id>http://www.nineteen.com/2017/07/01/hello-world/</id>
+    <link href="http://www.nineteen.me/2017/07/01/hello-world/"/>
+    <id>http://www.nineteen.me/2017/07/01/hello-world/</id>
     <published>2017-07-01T07:04:42.000Z</published>
     <updated>2017-07-01T07:04:42.000Z</updated>
     
