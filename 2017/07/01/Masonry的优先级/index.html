@@ -1,28 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-  <title>Nineteen</title>
-  
-  <link href="/atom.xml" rel="self"/>
-  
-  <link href="http://www.nineteen.me/"/>
-  <updated>2017-07-01T11:31:59.000Z</updated>
-  <id>http://www.nineteen.me/</id>
-  
-  <author>
-    <name>郑祯</name>
-    
-  </author>
-  
-  <generator uri="http://hexo.io/">Hexo</generator>
-  
-  <entry>
-    <title></title>
-    <link href="http://www.nineteen.me/2017/07/01/Masonry%E7%9A%84%E4%BC%98%E5%85%88%E7%BA%A7/"/>
-    <id>http://www.nineteen.me/2017/07/01/Masonry的优先级/</id>
-    <published>2017-07-01T11:30:05.000Z</published>
-    <updated>2017-07-01T11:31:59.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>#####可能标题不能够完全解释清楚本文到底要描述什么，没关系，我们来举出一个实际的例子，看下图：</p>
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title>  · Nineteen</title><meta name="description" content=" - 郑祯"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/css/prontera.css"><link rel="search" type="application/opensearchdescription+xml" href="http://www.nineteen.me/atom.xml" title="Nineteen"></head><body><header class="feature-header"><nav class="component-nav"><ul><div class="logo-container"><a href="/"><h2 class="title">Nineteen</h2></a></div><a href="/" target="_self" class="li component-nav-item"><p>INDEX</p></a><a href="/archives" target="_self" class="li component-nav-item"><p>ARCHIVES</p></a><ul class="shortcut-icons"><a href="https://github.com/NtZheng" target="_blank"><img src="/images/github.svg" class="icon"></a></ul></ul></nav></header><main class="container"><div id="post-container"><div class="post"><article class="post-block"><h1 class="post-title"></h1><div class="post-info">Jul 1, 2017</div><div class="post-content"><p>#####可能标题不能够完全解释清楚本文到底要描述什么，没关系，我们来举出一个实际的例子，看下图：</p>
 <p><img src="http://upload-images.jianshu.io/upload_images/2070409-595fda6c03a18609.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
 <p>#####红框中的我们发现在第一行一共有三个控件，一个是标题的UILabel（表示为：headLineTabel），一个是宝石的图标UIImageView（表示为：diamondImageView），再有一个是宝石的数量UILabel（表示为：diamondLabel），这时候我们用Masonry编写代码的时候往往一般是这样的思路：<br><figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 钻石数量label</span></div><div class="line">[<span class="keyword">self</span>.contentView addSubview:<span class="keyword">self</span>.diamondLabel];</div><div class="line">[<span class="keyword">self</span>.diamondLabel mas_makeConstraints:^(MASConstraintMaker *make) &#123;</div><div class="line">    make.right.equalTo(<span class="keyword">self</span>.contentView).with.offset(<span class="number">-13</span> * AutoLayoutScaleX);</div><div class="line">    make.top.equalTo(<span class="keyword">self</span>.contentView).with.offset(<span class="number">13</span> * AutoLayoutScaleY);</div><div class="line">    </div><div class="line">&#125;];</div><div class="line"></div><div class="line"><span class="comment">// 钻石imageView</span></div><div class="line">[<span class="keyword">self</span>.contentView addSubview:<span class="keyword">self</span>.diamondImageView];</div><div class="line">[<span class="keyword">self</span>.diamondImageView mas_makeConstraints:^(MASConstraintMaker *make) &#123;</div><div class="line">    make.right.equalTo(<span class="keyword">self</span>.diamondLabel.mas_left).with.offset(<span class="number">-2</span> * AutoLayoutScaleX);</div><div class="line">    make.centerY.equalTo(<span class="keyword">self</span>.diamondLabel);</div><div class="line">&#125;];</div><div class="line"></div><div class="line"><span class="comment">// 标题label</span></div><div class="line">[<span class="keyword">self</span>.contentView addSubview:<span class="keyword">self</span>.headLineLabel];</div><div class="line">[<span class="keyword">self</span>.headLineLabel mas_makeConstraints:^(MASConstraintMaker *make) &#123;</div><div class="line">    make.left.equalTo(<span class="keyword">self</span>.contentView).with.offset(<span class="number">10</span> * AutoLayoutScaleX);</div><div class="line">    make.centerY.equalTo(<span class="keyword">self</span>.diamondLabel);</div><div class="line">&#125;];</div></pre></td></tr></table></figure></p>
 <p>#####但是这样的布局所造成的效果肯定不可能是上图所示，因为headLineLabel和diamondImageView之间没有设置约束，所以如果headLine的长度过于长，将会和diamondImageView相互重叠，本文就是要讲解解决这个问题的方法。</p>
@@ -54,43 +30,12 @@
 </ol>
 </li>
 </ul>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;#####可能标题不能够完全解释清楚本文到底要描述什么，没关系，我们来举出一个实际的例子，看下图：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;http://upload-images.jianshu.io/upload_images/2070409-595fda6c03a18609
-    
-    </summary>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>Hello World</title>
-    <link href="http://www.nineteen.me/2017/07/01/hello-world/"/>
-    <id>http://www.nineteen.me/2017/07/01/hello-world/</id>
-    <published>2017-07-01T07:04:42.000Z</published>
-    <updated>2017-07-01T07:04:42.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo server</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo generate</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo deploy</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.
-    
-    </summary>
-    
-    
-  </entry>
-  
-</feed>
+</div></article></div><div id="disqus_thread"></div></div><script>var disqus_shortname = 'angrypowman';
+var disqus_identifier = '2017/07/01/Masonry的优先级/';
+var disqus_title = '';
+var disqus_url = 'http://www.nineteen.me/2017/07/01/Masonry的优先级/';
+(function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();</script><script id="dsq-count-scr" src="//angrypowman.disqus.com/count.js" async></script></main><footer class="footer-container"><div class="paginator"><a href="/2017/07/01/hello-world/" class="next">NEXT</a></div><div class="copyright"><p>© 2017 <a href="http://www.nineteen.me">郑祯</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/AngryPowman/hexo-theme-prontera" target="_blank">hexo-theme-prontera</a>.</p></div></footer><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"angrypowman",'auto');ga('send','pageview');</script></body></html>
