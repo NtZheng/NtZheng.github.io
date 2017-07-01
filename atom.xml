@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.nineteen.me/"/>
-  <updated>2017-07-01T11:31:59.000Z</updated>
+  <updated>2017-07-01T07:04:42.000Z</updated>
   <id>http://www.nineteen.me/</id>
   
   <author>
@@ -14,57 +14,6 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
-  
-  <entry>
-    <title></title>
-    <link href="http://www.nineteen.me/2017/07/01/Masonry%E7%9A%84%E4%BC%98%E5%85%88%E7%BA%A7/"/>
-    <id>http://www.nineteen.me/2017/07/01/Masonry的优先级/</id>
-    <published>2017-07-01T11:30:05.000Z</published>
-    <updated>2017-07-01T11:31:59.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>#####可能标题不能够完全解释清楚本文到底要描述什么，没关系，我们来举出一个实际的例子，看下图：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/2070409-595fda6c03a18609.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
-<p>#####红框中的我们发现在第一行一共有三个控件，一个是标题的UILabel（表示为：headLineTabel），一个是宝石的图标UIImageView（表示为：diamondImageView），再有一个是宝石的数量UILabel（表示为：diamondLabel），这时候我们用Masonry编写代码的时候往往一般是这样的思路：<br><figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 钻石数量label</span></div><div class="line">[<span class="keyword">self</span>.contentView addSubview:<span class="keyword">self</span>.diamondLabel];</div><div class="line">[<span class="keyword">self</span>.diamondLabel mas_makeConstraints:^(MASConstraintMaker *make) &#123;</div><div class="line">    make.right.equalTo(<span class="keyword">self</span>.contentView).with.offset(<span class="number">-13</span> * AutoLayoutScaleX);</div><div class="line">    make.top.equalTo(<span class="keyword">self</span>.contentView).with.offset(<span class="number">13</span> * AutoLayoutScaleY);</div><div class="line">    </div><div class="line">&#125;];</div><div class="line"></div><div class="line"><span class="comment">// 钻石imageView</span></div><div class="line">[<span class="keyword">self</span>.contentView addSubview:<span class="keyword">self</span>.diamondImageView];</div><div class="line">[<span class="keyword">self</span>.diamondImageView mas_makeConstraints:^(MASConstraintMaker *make) &#123;</div><div class="line">    make.right.equalTo(<span class="keyword">self</span>.diamondLabel.mas_left).with.offset(<span class="number">-2</span> * AutoLayoutScaleX);</div><div class="line">    make.centerY.equalTo(<span class="keyword">self</span>.diamondLabel);</div><div class="line">&#125;];</div><div class="line"></div><div class="line"><span class="comment">// 标题label</span></div><div class="line">[<span class="keyword">self</span>.contentView addSubview:<span class="keyword">self</span>.headLineLabel];</div><div class="line">[<span class="keyword">self</span>.headLineLabel mas_makeConstraints:^(MASConstraintMaker *make) &#123;</div><div class="line">    make.left.equalTo(<span class="keyword">self</span>.contentView).with.offset(<span class="number">10</span> * AutoLayoutScaleX);</div><div class="line">    make.centerY.equalTo(<span class="keyword">self</span>.diamondLabel);</div><div class="line">&#125;];</div></pre></td></tr></table></figure></p>
-<p>#####但是这样的布局所造成的效果肯定不可能是上图所示，因为headLineLabel和diamondImageView之间没有设置约束，所以如果headLine的长度过于长，将会和diamondImageView相互重叠，本文就是要讲解解决这个问题的方法。</p>
-<ul>
-<li><p><strong>问题出现原因</strong></p>
-<ol>
-<li>没有直接对带有文字的UILabel进行宽度的约束</li>
-<li>两个会相互重叠的控件之间没有设置约束</li>
-</ol>
-</li>
-<li><p><strong>思考</strong></p>
-<ol>
-<li>先来试试直接对UILable计算宽度来进行写死的约束，这样的话我也应该将其他控件的宽度也写死才能成功编译，但是这样我就需要算好两个控件的宽度，而最好的其实是不限制他们，让他们自己知道怎么“谦让”对方</li>
-<li>在两个控件之间设置约束，由于宽度都没有限制，所以这样写，从原理上分析，是肯定会报错的（当然实际也会报错）</li>
-<li>问题已经由上面两个点抛出，那么实际上解决这个问题的方法是设置各个控件的优先级，让他们自己知道自己是什么样的地位的，低地位的控件需要谦让高地位的控件，让高地位的控件优先将自己显示完全</li>
-</ol>
-</li>
-<li><p><strong>解决办法</strong></p>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 标题label</span></div><div class="line">    [<span class="keyword">self</span>.contentView addSubview:<span class="keyword">self</span>.headLineLabel];</div><div class="line">    [<span class="keyword">self</span>.headLineLabel mas_makeConstraints:^(MASConstraintMaker *make) &#123;</div><div class="line">        make.left.equalTo(<span class="keyword">self</span>.contentView).with.offset(<span class="number">10</span> * AutoLayoutScaleX);</div><div class="line">        make.centerY.equalTo(<span class="keyword">self</span>.diamondLabel);</div><div class="line">        make.right.mas_lessThanOrEqualTo(<span class="keyword">self</span>.diamondLabel.mas_left).with.offset(<span class="number">-5</span> * AutoLayoutScaleX);</div><div class="line">    &#125;];</div><div class="line"><span class="comment">// 设置优先级</span></div><div class="line">    [<span class="keyword">self</span>.diamondImageView setContentCompressionResistancePriority:<span class="built_in">UILayoutPriorityRequired</span> forAxis:<span class="built_in">UILayoutConstraintAxisHorizontal</span>];</div><div class="line">    [<span class="keyword">self</span>.diamondLabel setContentCompressionResistancePriority:<span class="built_in">UILayoutPriorityRequired</span> forAxis:<span class="built_in">UILayoutConstraintAxisHorizontal</span>];</div><div class="line"></div><div class="line">    [<span class="keyword">self</span>.headLineLabel setContentCompressionResistancePriority:<span class="built_in">UILayoutPriorityDefaultLow</span> forAxis:<span class="built_in">UILayoutConstraintAxisHorizontal</span>];</div></pre></td></tr></table></figure>
-</li>
-<li><p><strong>代码分析和解释</strong></p>
-<ol>
-<li>在headLineLabel的布局中添加了一个约束，即为headLineLabel和diamondImageView之间的约束，但是所使用的不是equalTo，而是mas_lessThanOrEqualTo，表示极限的情况是等于，一般来说是小于</li>
-<li>优先级函数：<ul>
-<li>第一个参数：通俗来讲，不同的优先级，表示显示的完整性的高低，优先级越高，那么在父控件无法在无越界的情况下的情况下，就会优先先把优先级高的控件显示完整，然后再依次显示优先级低的</li>
-<li>第二个参数：代表在什么方向上进行优先级限制</li>
-</ul>
-</li>
-</ol>
-</li>
-</ul>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;#####可能标题不能够完全解释清楚本文到底要描述什么，没关系，我们来举出一个实际的例子，看下图：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;http://upload-images.jianshu.io/upload_images/2070409-595fda6c03a18609
-    
-    </summary>
-    
-    
-  </entry>
   
   <entry>
     <title>Hello World</title>
