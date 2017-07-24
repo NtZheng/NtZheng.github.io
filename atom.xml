@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.nineteen.me/"/>
-  <updated>2017-07-01T12:03:59.000Z</updated>
+  <updated>2017-07-24T11:33:27.000Z</updated>
   <id>http://www.nineteen.me/</id>
   
   <author>
@@ -16,13 +16,67 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>iOS核心动画</title>
+    <link href="http://www.nineteen.me/2017/07/24/iOS%E6%A0%B8%E5%BF%83%E5%8A%A8%E7%94%BB/"/>
+    <id>http://www.nineteen.me/2017/07/24/iOS核心动画/</id>
+    <published>2017-07-24T07:48:45.000Z</published>
+    <updated>2017-07-24T11:33:27.000Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="动画是iOS中非常有趣的部分，同时也是提升用户交互体验的有力工具，本文主要分为两个部分，第一个部分讲解基础知识，第二个部门列举基本使用"><a href="#动画是iOS中非常有趣的部分，同时也是提升用户交互体验的有力工具，本文主要分为两个部分，第一个部分讲解基础知识，第二个部门列举基本使用" class="headerlink" title="动画是iOS中非常有趣的部分，同时也是提升用户交互体验的有力工具，本文主要分为两个部分，第一个部分讲解基础知识，第二个部门列举基本使用"></a>动画是iOS中非常有趣的部分，同时也是提升用户交互体验的有力工具，本文主要分为两个部分，第一个部分讲解基础知识，第二个部门列举基本使用</h3><h4 id="一、基础知识"><a href="#一、基础知识" class="headerlink" title="一、基础知识"></a>一、基础知识</h4><h5 id="1-1、动画相关框架"><a href="#1-1、动画相关框架" class="headerlink" title="1.1、动画相关框架"></a>1.1、动画相关框架</h5><p><img src="http://upload-images.jianshu.io/upload_images/2070409-6dd0ef1b06e4a6f6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""><br>从上图可以发现</p>
+<ul>
+<li>UIView在最上层</li>
+<li>往下依次是CoreAnimation</li>
+<li>CoreGraphics、Hardware</li>
+</ul>
+<h5 id="1-2、iOS系统框架"><a href="#1-2、iOS系统框架" class="headerlink" title="1.2、iOS系统框架"></a>1.2、iOS系统框架</h5><p><img src="http://upload-images.jianshu.io/upload_images/2070409-a678b1c3b50c6835.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""><br>上图为iOS中的四层架构</p>
+<ul>
+<li><strong>UIView</strong>位于Cocoa Touch层</li>
+<li><strong>CoreAnimation</strong>位于Media Layer中的QuartzCore框架中，查看QuartzCore的头文件可以发现，只引入了CoreAnimation。<strong>CALayer</strong>这个熟悉的对象是在CoreAnimation中，CoreAnimation往往作用于CALayer而不是UIView</li>
+<li><strong>Core Graphics</strong>也是在Media Layer层中的框架</li>
+</ul>
+<h5 id="1-3、UIView、QuartzCore和CoreGraphics之间的关系"><a href="#1-3、UIView、QuartzCore和CoreGraphics之间的关系" class="headerlink" title="1.3、UIView、QuartzCore和CoreGraphics之间的关系"></a>1.3、UIView、QuartzCore和CoreGraphics之间的关系</h5><ul>
+<li><strong>UIView</strong>：主要负责事件响应、页面展示和与RunLoop相关操作</li>
+<li><strong>QuartzCore</strong>：不单负责动画的创建和执行，还会将图形图像最终显示到屏幕上（本质上是CoreAnimation通过OpenGLES来做的）</li>
+<li><strong>CoreGraphics</strong>：是一个基于C的库函数的高级绘画引擎，负责创建最终显示到屏幕上的数据模型</li>
+</ul>
+<h5 id="1-4、UIView和CALayer的协同"><a href="#1-4、UIView和CALayer的协同" class="headerlink" title="1.4、UIView和CALayer的协同"></a>1.4、UIView和CALayer的协同</h5><ul>
+<li>UIView都拥有一个CALayer，CALayer将UIView设置为了自己的代理对象</li>
+<li>对于CALayer对象，改变其属性，都会触发一个简单动画</li>
+<li>UIView禁止在默认情况下禁止了CALayer的动画，所以我们在改变UIView的属性的时候，不会触发动画，而在UIView的动画block中，我们又能产生动画，在原理上为：一个可动画的CALayer属性改变的时候，都会寻找并运行一个合适的改变，这个改变是CAAction对象，而UIView的CALayer对象会询问他的delegate，即UIView，询问提供一个CAAction对象，delegate可以通过下面三种方式之一进行响应<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">1、它可以返回一个动作对象，这种情况下 layer 将使用这个动作。</div><div class="line">2、它可以返回一个 nil， 这样 layer 就会到其他地方继续寻找。</div><div class="line">3、它可以返回一个 NSNull 对象，告诉 layer 这里不需要执行一个动作，搜索也会就此停止。</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h5 id="1-5、UIView和CALayer的关系"><a href="#1-5、UIView和CALayer的关系" class="headerlink" title="1.5、UIView和CALayer的关系"></a>1.5、UIView和CALayer的关系</h5><ul>
+<li>UIView的属性只是简单地返回了CALayer对象的属性</li>
+<li>UIView作为CALayer的代理，负责事件处理功能，CALayer负责页面绘制（前面也提到了CoreAnimation的作用）</li>
+</ul>
+<h4 id="二、基本使用"><a href="#二、基本使用" class="headerlink" title="二、基本使用"></a>二、基本使用</h4><h5 id="2-1、Core-Animation类图"><a href="#2-1、Core-Animation类图" class="headerlink" title="2.1、Core Animation类图"></a>2.1、Core Animation类图</h5><p><img src="http://upload-images.jianshu.io/upload_images/2070409-d1060614eb08a72b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<h5 id="2-2、类别"><a href="#2-2、类别" class="headerlink" title="2.2、类别"></a>2.2、类别</h5><p>我们常用到的为下面四种：</p>
+<ul>
+<li><strong>CAAnimationGroup</strong>：动画组，将不同类型的动画同时进行或者连续进行</li>
+<li><strong>CABasicAnimation</strong>：基本动画，包括一些基本属性的动画，例如位移、缩放、渐变等</li>
+<li><strong>CAKeyFrameAnimation</strong>：关键帧动画，连续进行多个阶段的动画</li>
+<li><strong>CATransition</strong>：过渡动画</li>
+</ul>
+<p>除了上面四种，还有一种是iOS9之后提供的弹簧动画<strong>CASpringAnimation</strong><br>另外，CoreGraphics中提供了<strong>仿射变化动画</strong>，可以很方便地进行一些基本动画操作</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;动画是iOS中非常有趣的部分，同时也是提升用户交互体验的有力工具，本文主要分为两个部分，第一个部分讲解基础知识，第二个部门列举基本使用&quot;&gt;&lt;a href=&quot;#动画是iOS中非常有趣的部分，同时也是提升用户交互体验的有力工具，本文主要分为两个部分，第一个部分讲解基础
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
     <title>Masonry中的优先级</title>
     <link href="http://www.nineteen.me/2017/07/01/Masonry%E4%B8%AD%E7%9A%84%E4%BC%98%E5%85%88%E7%BA%A7/"/>
     <id>http://www.nineteen.me/2017/07/01/Masonry中的优先级/</id>
     <published>2017-07-01T11:45:40.000Z</published>
-    <updated>2017-07-01T12:03:59.000Z</updated>
+    <updated>2017-07-24T11:27:27.000Z</updated>
     
-    <content type="html"><![CDATA[<h5 id="可能标题不能够完全解释清楚本文到底要描述什么，没关系，我们来举出一个实际的例子，看下图："><a href="#可能标题不能够完全解释清楚本文到底要描述什么，没关系，我们来举出一个实际的例子，看下图：" class="headerlink" title="可能标题不能够完全解释清楚本文到底要描述什么，没关系，我们来举出一个实际的例子，看下图："></a>可能标题不能够完全解释清楚本文到底要描述什么，没关系，我们来举出一个实际的例子，看下图：</h5><p><img src="http://upload-images.jianshu.io/upload_images/2070409-595fda6c03a18609.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+    <content type="html"><![CDATA[<h3 id="可能标题不能够完全解释清楚本文到底要描述什么，没关系，我们来举出一个实际的例子，看下图："><a href="#可能标题不能够完全解释清楚本文到底要描述什么，没关系，我们来举出一个实际的例子，看下图：" class="headerlink" title="可能标题不能够完全解释清楚本文到底要描述什么，没关系，我们来举出一个实际的例子，看下图："></a>可能标题不能够完全解释清楚本文到底要描述什么，没关系，我们来举出一个实际的例子，看下图：</h3><p><img src="http://upload-images.jianshu.io/upload_images/2070409-595fda6c03a18609.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
 <h5 id="红框中的我们发现在第一行一共有三个控件，一个是标题的UILabel（表示为：headLineTabel），一个是宝石的图标UIImageView（表示为：diamondImageView），再有一个是宝石的数量UILabel（表示为：diamondLabel），这时候我们用Masonry编写代码的时候往往一般是这样的思路："><a href="#红框中的我们发现在第一行一共有三个控件，一个是标题的UILabel（表示为：headLineTabel），一个是宝石的图标UIImageView（表示为：diamondImageView），再有一个是宝石的数量UILabel（表示为：diamondLabel），这时候我们用Masonry编写代码的时候往往一般是这样的思路：" class="headerlink" title="红框中的我们发现在第一行一共有三个控件，一个是标题的UILabel（表示为：headLineTabel），一个是宝石的图标UIImageView（表示为：diamondImageView），再有一个是宝石的数量UILabel（表示为：diamondLabel），这时候我们用Masonry编写代码的时候往往一般是这样的思路："></a>红框中的我们发现在第一行一共有三个控件，一个是标题的UILabel（表示为：headLineTabel），一个是宝石的图标UIImageView（表示为：diamondImageView），再有一个是宝石的数量UILabel（表示为：diamondLabel），这时候我们用Masonry编写代码的时候往往一般是这样的思路：</h5><figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 钻石数量label</span></div><div class="line">[<span class="keyword">self</span>.contentView addSubview:<span class="keyword">self</span>.diamondLabel];</div><div class="line">[<span class="keyword">self</span>.diamondLabel mas_makeConstraints:^(MASConstraintMaker *make) &#123;</div><div class="line">    make.right.equalTo(<span class="keyword">self</span>.contentView).with.offset(<span class="number">-13</span> * AutoLayoutScaleX);</div><div class="line">    make.top.equalTo(<span class="keyword">self</span>.contentView).with.offset(<span class="number">13</span> * AutoLayoutScaleY);</div><div class="line">    </div><div class="line">&#125;];</div><div class="line"></div><div class="line"><span class="comment">// 钻石imageView</span></div><div class="line">[<span class="keyword">self</span>.contentView addSubview:<span class="keyword">self</span>.diamondImageView];</div><div class="line">[<span class="keyword">self</span>.diamondImageView mas_makeConstraints:^(MASConstraintMaker *make) &#123;</div><div class="line">    make.right.equalTo(<span class="keyword">self</span>.diamondLabel.mas_left).with.offset(<span class="number">-2</span> * AutoLayoutScaleX);</div><div class="line">    make.centerY.equalTo(<span class="keyword">self</span>.diamondLabel);</div><div class="line">&#125;];</div><div class="line"></div><div class="line"><span class="comment">// 标题label</span></div><div class="line">[<span class="keyword">self</span>.contentView addSubview:<span class="keyword">self</span>.headLineLabel];</div><div class="line">[<span class="keyword">self</span>.headLineLabel mas_makeConstraints:^(MASConstraintMaker *make) &#123;</div><div class="line">    make.left.equalTo(<span class="keyword">self</span>.contentView).with.offset(<span class="number">10</span> * AutoLayoutScaleX);</div><div class="line">    make.centerY.equalTo(<span class="keyword">self</span>.diamondLabel);</div><div class="line">&#125;];</div></pre></td></tr></table></figure>
 <h5 id="但是这样的布局所造成的效果肯定不可能是上图所示，因为headLineLabel和diamondImageView之间没有设置约束，所以如果headLine的长度过于长，将会和diamondImageView相互重叠，本文就是要讲解解决这个问题的方法。"><a href="#但是这样的布局所造成的效果肯定不可能是上图所示，因为headLineLabel和diamondImageView之间没有设置约束，所以如果headLine的长度过于长，将会和diamondImageView相互重叠，本文就是要讲解解决这个问题的方法。" class="headerlink" title="但是这样的布局所造成的效果肯定不可能是上图所示，因为headLineLabel和diamondImageView之间没有设置约束，所以如果headLine的长度过于长，将会和diamondImageView相互重叠，本文就是要讲解解决这个问题的方法。"></a>但是这样的布局所造成的效果肯定不可能是上图所示，因为headLineLabel和diamondImageView之间没有设置约束，所以如果headLine的长度过于长，将会和diamondImageView相互重叠，本文就是要讲解解决这个问题的方法。</h5><ul>
 <li><p><strong>问题出现原因</strong></p>
@@ -56,7 +110,7 @@
     
     <summary type="html">
     
-      &lt;h5 id=&quot;可能标题不能够完全解释清楚本文到底要描述什么，没关系，我们来举出一个实际的例子，看下图：&quot;&gt;&lt;a href=&quot;#可能标题不能够完全解释清楚本文到底要描述什么，没关系，我们来举出一个实际的例子，看下图：&quot; class=&quot;headerlink&quot; title=&quot;可能标题
+      &lt;h3 id=&quot;可能标题不能够完全解释清楚本文到底要描述什么，没关系，我们来举出一个实际的例子，看下图：&quot;&gt;&lt;a href=&quot;#可能标题不能够完全解释清楚本文到底要描述什么，没关系，我们来举出一个实际的例子，看下图：&quot; class=&quot;headerlink&quot; title=&quot;可能标题
     
     </summary>
     

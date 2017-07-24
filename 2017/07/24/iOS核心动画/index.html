@@ -1,0 +1,45 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> iOS核心动画 · Nineteen</title><meta name="description" content="iOS核心动画 - 郑祯"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/css/prontera.css"><link rel="search" type="application/opensearchdescription+xml" href="http://www.nineteen.me/atom.xml" title="Nineteen"></head><body><header class="feature-header"><nav class="component-nav"><ul><div class="logo-container"><a href="/"><h2 class="title">Nineteen</h2></a></div><a href="/" target="_self" class="li component-nav-item"><p>INDEX</p></a><a href="/archives" target="_self" class="li component-nav-item"><p>ARCHIVES</p></a><ul class="shortcut-icons"><a href="http://www.jianshu.com/u/dd2dfc34332d" target="_blank"><img src="/images/jianshu.svg" class="icon"></a><a href="http://weibo.com/5458978084/profile?rightmod=1&amp;wvr=6&amp;mod=personinfo&amp;is_all=1" target="_blank"><img src="/images/weibo.svg" class="icon"></a><a href="https://github.com/NtZheng" target="_blank"><img src="/images/github.svg" class="icon"></a></ul></ul></nav></header><main class="container"><div id="post-container"><div class="post"><article class="post-block"><h1 class="post-title">iOS核心动画</h1><div class="post-info">Jul 24, 2017</div><div class="post-content"><h3 id="动画是iOS中非常有趣的部分，同时也是提升用户交互体验的有力工具，本文主要分为两个部分，第一个部分讲解基础知识，第二个部门列举基本使用"><a href="#动画是iOS中非常有趣的部分，同时也是提升用户交互体验的有力工具，本文主要分为两个部分，第一个部分讲解基础知识，第二个部门列举基本使用" class="headerlink" title="动画是iOS中非常有趣的部分，同时也是提升用户交互体验的有力工具，本文主要分为两个部分，第一个部分讲解基础知识，第二个部门列举基本使用"></a>动画是iOS中非常有趣的部分，同时也是提升用户交互体验的有力工具，本文主要分为两个部分，第一个部分讲解基础知识，第二个部门列举基本使用</h3><h4 id="一、基础知识"><a href="#一、基础知识" class="headerlink" title="一、基础知识"></a>一、基础知识</h4><h5 id="1-1、动画相关框架"><a href="#1-1、动画相关框架" class="headerlink" title="1.1、动画相关框架"></a>1.1、动画相关框架</h5><p><img src="http://upload-images.jianshu.io/upload_images/2070409-6dd0ef1b06e4a6f6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""><br>从上图可以发现</p>
+<ul>
+<li>UIView在最上层</li>
+<li>往下依次是CoreAnimation</li>
+<li>CoreGraphics、Hardware</li>
+</ul>
+<h5 id="1-2、iOS系统框架"><a href="#1-2、iOS系统框架" class="headerlink" title="1.2、iOS系统框架"></a>1.2、iOS系统框架</h5><p><img src="http://upload-images.jianshu.io/upload_images/2070409-a678b1c3b50c6835.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""><br>上图为iOS中的四层架构</p>
+<ul>
+<li><strong>UIView</strong>位于Cocoa Touch层</li>
+<li><strong>CoreAnimation</strong>位于Media Layer中的QuartzCore框架中，查看QuartzCore的头文件可以发现，只引入了CoreAnimation。<strong>CALayer</strong>这个熟悉的对象是在CoreAnimation中，CoreAnimation往往作用于CALayer而不是UIView</li>
+<li><strong>Core Graphics</strong>也是在Media Layer层中的框架</li>
+</ul>
+<h5 id="1-3、UIView、QuartzCore和CoreGraphics之间的关系"><a href="#1-3、UIView、QuartzCore和CoreGraphics之间的关系" class="headerlink" title="1.3、UIView、QuartzCore和CoreGraphics之间的关系"></a>1.3、UIView、QuartzCore和CoreGraphics之间的关系</h5><ul>
+<li><strong>UIView</strong>：主要负责事件响应、页面展示和与RunLoop相关操作</li>
+<li><strong>QuartzCore</strong>：不单负责动画的创建和执行，还会将图形图像最终显示到屏幕上（本质上是CoreAnimation通过OpenGLES来做的）</li>
+<li><strong>CoreGraphics</strong>：是一个基于C的库函数的高级绘画引擎，负责创建最终显示到屏幕上的数据模型</li>
+</ul>
+<h5 id="1-4、UIView和CALayer的协同"><a href="#1-4、UIView和CALayer的协同" class="headerlink" title="1.4、UIView和CALayer的协同"></a>1.4、UIView和CALayer的协同</h5><ul>
+<li>UIView都拥有一个CALayer，CALayer将UIView设置为了自己的代理对象</li>
+<li>对于CALayer对象，改变其属性，都会触发一个简单动画</li>
+<li>UIView禁止在默认情况下禁止了CALayer的动画，所以我们在改变UIView的属性的时候，不会触发动画，而在UIView的动画block中，我们又能产生动画，在原理上为：一个可动画的CALayer属性改变的时候，都会寻找并运行一个合适的改变，这个改变是CAAction对象，而UIView的CALayer对象会询问他的delegate，即UIView，询问提供一个CAAction对象，delegate可以通过下面三种方式之一进行响应<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">1、它可以返回一个动作对象，这种情况下 layer 将使用这个动作。</div><div class="line">2、它可以返回一个 nil， 这样 layer 就会到其他地方继续寻找。</div><div class="line">3、它可以返回一个 NSNull 对象，告诉 layer 这里不需要执行一个动作，搜索也会就此停止。</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h5 id="1-5、UIView和CALayer的关系"><a href="#1-5、UIView和CALayer的关系" class="headerlink" title="1.5、UIView和CALayer的关系"></a>1.5、UIView和CALayer的关系</h5><ul>
+<li>UIView的属性只是简单地返回了CALayer对象的属性</li>
+<li>UIView作为CALayer的代理，负责事件处理功能，CALayer负责页面绘制（前面也提到了CoreAnimation的作用）</li>
+</ul>
+<h4 id="二、基本使用"><a href="#二、基本使用" class="headerlink" title="二、基本使用"></a>二、基本使用</h4><h5 id="2-1、Core-Animation类图"><a href="#2-1、Core-Animation类图" class="headerlink" title="2.1、Core Animation类图"></a>2.1、Core Animation类图</h5><p><img src="http://upload-images.jianshu.io/upload_images/2070409-d1060614eb08a72b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<h5 id="2-2、类别"><a href="#2-2、类别" class="headerlink" title="2.2、类别"></a>2.2、类别</h5><p>我们常用到的为下面四种：</p>
+<ul>
+<li><strong>CAAnimationGroup</strong>：动画组，将不同类型的动画同时进行或者连续进行</li>
+<li><strong>CABasicAnimation</strong>：基本动画，包括一些基本属性的动画，例如位移、缩放、渐变等</li>
+<li><strong>CAKeyFrameAnimation</strong>：关键帧动画，连续进行多个阶段的动画</li>
+<li><strong>CATransition</strong>：过渡动画</li>
+</ul>
+<p>除了上面四种，还有一种是iOS9之后提供的弹簧动画<strong>CASpringAnimation</strong><br>另外，CoreGraphics中提供了<strong>仿射变化动画</strong>，可以很方便地进行一些基本动画操作</p>
+</div></article></div><div id="disqus_thread"></div></div><script>var disqus_shortname = 'angrypowman';
+var disqus_identifier = '2017/07/24/iOS核心动画/';
+var disqus_title = 'iOS核心动画';
+var disqus_url = 'http://www.nineteen.me/2017/07/24/iOS核心动画/';
+(function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();</script><script id="dsq-count-scr" src="//angrypowman.disqus.com/count.js" async></script></main><footer class="footer-container"><div class="paginator"><a href="/2017/07/01/Masonry中的优先级/" class="next">NEXT</a></div><div class="copyright"><p>© 2017 <a href="http://www.nineteen.me">郑祯</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/AngryPowman/hexo-theme-prontera" target="_blank">hexo-theme-prontera</a>.</p></div></footer><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"angrypowman",'auto');ga('send','pageview');</script></body></html>
