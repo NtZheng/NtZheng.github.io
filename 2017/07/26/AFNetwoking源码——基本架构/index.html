@@ -1,0 +1,60 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> AFNetwoking源码——基本架构 · Nineteen</title><meta name="description" content="AFNetwoking源码——基本架构 - 郑祯"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/css/prontera.css"><link rel="search" type="application/opensearchdescription+xml" href="http://www.nineteen.me/atom.xml" title="Nineteen"></head><body><header class="feature-header"><nav class="component-nav"><ul><div class="logo-container"><a href="/"><h2 class="title">Nineteen</h2></a></div><a href="/" target="_self" class="li component-nav-item"><p>INDEX</p></a><a href="/archives" target="_self" class="li component-nav-item"><p>ARCHIVES</p></a><ul class="shortcut-icons"><a href="http://www.jianshu.com/u/dd2dfc34332d" target="_blank"><img src="/images/jianshu.svg" class="icon"></a><a href="http://weibo.com/5458978084/profile?rightmod=1&amp;wvr=6&amp;mod=personinfo&amp;is_all=1" target="_blank"><img src="/images/weibo.svg" class="icon"></a><a href="https://github.com/NtZheng" target="_blank"><img src="/images/github.svg" class="icon"></a></ul></ul></nav></header><main class="container"><div id="post-container"><div class="post"><article class="post-block"><h1 class="post-title">AFNetwoking源码——基本架构</h1><div class="post-info">Jul 26, 2017</div><div class="post-content"><p>前段时间疯狂收割了一波offer之后，也发现了很多的不足，例如很多大公司的面试官会问：你看过开源框架的源码吗，233，第一次问到还好，一次又一次被问到未免还是有些尴尬，在深深的自我反省之后，觉得自己在底层知识方面确实有欠缺，利用这段空余时间，决定开启一段源码之旅<br><a id="more"></a><br><img src="http://upload-images.jianshu.io/upload_images/2070409-c0900baaff2f2d40.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<h5 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h5><p><img src="http://upload-images.jianshu.io/upload_images/2070409-aa486acfb22ed5a3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<p>从上图可以发现，AFNetwoking框架是一个比较简洁的框架，主要分为了几个部分</p>
+<ul>
+<li>网络通信模块：NSURLSession</li>
+<li>网络状态监听模块：Reachability</li>
+<li>网络通信安全模块：Security</li>
+<li>网络通信序列化模块：Serialization</li>
+<li>对UIKit框架扩展部分：UIKit（以Catagory形式添加特性）</li>
+</ul>
+<p>在这几个模块中，AFNetworking的核心模块是通信模块，在通信模块中有两个类，AFHTTPSessionManager和AFURLSessionManager，其中前者继承于后者，是对HTTP的专一化封装处理。大家都知道AFNetworking 3.0其实只是对NSURLSession做了封装处理，那接下来，就从源码角度来解释这个事情，在这之前我们先来看看使用NSURLSession和使用AFNetworking做网络请求在实现过程中有什么区别</p>
+<h5 id="使用区别"><a href="#使用区别" class="headerlink" title="使用区别"></a>使用区别</h5><ol>
+<li><strong>使用NSURLSession进行网络请求</strong></li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[[NSURL alloc] initWithString:@&quot;https://www.nineteen.me&quot;]];</div><div class="line">NSURLSession *session = [NSURLSession sharedSession];</div><div class="line">NSURLSessionDataTask *task = [session dataTaskWithRequest:request</div><div class="line">                                       completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) &#123;</div><div class="line">                                           NSString *dataString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];</div><div class="line">                                           NSLog(@&quot;%@&quot;, dataString);</div><div class="line">                                       &#125;];</div><div class="line">[task resume];</div></pre></td></tr></table></figure>
+<ol>
+<li><strong>使用AFHTTPSessionManager进行网络请求</strong></li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">AFHTTPSessionManager *manager = [[AFHTTPSessionManager alloc] initWithBaseURL:[[NSURL alloc] initWithString:@&quot;http://www.nineteen.me&quot;]];</div><div class="line">[manager GET:@&quot;2017/07/24/iOS核心动画/&quot; parameters:nil progress:nil</div><div class="line">    success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) &#123;</div><div class="line">      // Success</div><div class="line">    &#125; failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) &#123;</div><div class="line">      // error</div><div class="line">&#125;];</div></pre></td></tr></table></figure>
+<p>可以发现使用AFHTTPSessionManager进行网络请求大致分为了两步：</p>
+<ol>
+<li>创建一个AFHTTPSessionManager对象</li>
+<li>使用这个对象调用含有block的请求方法</li>
+</ol>
+<p>从调用上来看，AFNetworking的请求会更加易读和编写，接下来我们就看看这两部分在框架中是如何实现的</p>
+<h5 id="内部实现"><a href="#内部实现" class="headerlink" title="内部实现"></a>内部实现</h5><ul>
+<li>AFHTTPSessionManager类的架构<br><img src="http://upload-images.jianshu.io/upload_images/2070409-80614cd6298e4152.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></li>
+</ul>
+<p>在方法列表中，大致分为两部分，第一部分是初始化方法</p>
+<ul>
+<li>类初始化</li>
+<li>对象初始化</li>
+</ul>
+<p>manager这个类初始化方法是很常用的，我们去看它的实现，发现它也是调用了自己的对象初始化方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">+ (instancetype)manager &#123;</div><div class="line">    return [[[self class] alloc] initWithBaseURL:nil];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>那我们就先来研究一下第一个部分，初始化AFHTTPSessionManager的内部实现，我们首先来看看，初始化方法的函数调用栈</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">- [AFHTTPSessionManager initWithBaseURL:]</div><div class="line">	- [AFHTTPSessionManager initWithBaseURL:sessionConfiguration:] </div><div class="line">		- [AFURLSessionManager initWithSessionConfiguration:] // #1</div><div class="line">			- [NSURLSession sessionWithConfiguration:delegate:delegateQueue:] // #2</div><div class="line">			- [AFJSONResponseSerializer serializer] </div><div class="line">			- [AFSecurityPolicy defaultPolicy] </div><div class="line">			- [AFNetworkReachabilityManager sharedManager] </div><div class="line">		- [AFHTTPRequestSerializer serializer] </div><div class="line">		- [AFJSONResponseSerializer serializer]</div></pre></td></tr></table></figure>
+<ul>
+<li>#1：调用了父类AFURLSessionManager的初始化方法</li>
+<li>#2：调用了原生类NSURLSession的初始化方法</li>
+</ul>
+<p>从上面的函数调用栈可以发现，AFNetworking的内部实现到栈底仍然是操作了原生的NSURLSession，从根本上只是对原生的NSURLSession做了封装操作，封装了一些序列化、通信安全等策略，提供简洁的API，方便用户编码。</p>
+<p>了解了初始化之后，我们再来看看发送请求的内部实现，在这里就用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">GET:parameters:process:success:failure:</div></pre></td></tr></table></figure>
+<p>方法作为例子来查看一下源码实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">- [AFHTTPSessionManager GET:parameters:process:success:failure:] </div><div class="line">	- [AFHTTPSessionManager dataTaskWithHTTPMethod:parameters:uploadProgress:downloadProgress:success:failure:] // #1 </div><div class="line">		- [AFHTTPRequestSerializer requestWithMethod:URLString:parameters:error:] // 获得NSMutableURLRequest</div><div class="line">		- [AFURLSessionManager dataTaskWithRequest:uploadProgress:downloadProgress:completionHandler:] //  #2</div><div class="line">			- [NSURLSession dataTaskWithRequest:] // #3</div><div class="line">			- [AFURLSessionManager addDelegateForDataTask:uploadProgress:downloadProgress:completionHandler:] // 添加代理</div><div class="line">				- [AFURLSessionManagerTaskDelegate init]</div><div class="line">				- [AFURLSessionManager setDelegate:forTask:]</div><div class="line">	- [NSURLSessionDataTask resume]</div></pre></td></tr></table></figure>
+<ul>
+<li>#1、#2、#3这三个方法得到的是同一个对象，来自#3的NSURLSessionDataTask对象</li>
+</ul>
+<p>从这里也能发现请求操作内部实现也是和原生NSURLSession操作一样，创建task，调用resume发送请求</p>
+<h5 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h5><p>AFNetworking2.0和3.0区别很大，也是因为苹果废弃了NSURLConnection，而改用了NSURLSession，AFNetworking3.0实际上只是对NSURLSession所做的操作进行了高度封装，提供更加简洁的API供编码调用</p>
+</div></article></div><div id="disqus_thread"></div></div><script>var disqus_shortname = 'angrypowman';
+var disqus_identifier = '2017/07/26/AFNetwoking源码——基本架构/';
+var disqus_title = 'AFNetwoking源码——基本架构';
+var disqus_url = 'http://www.nineteen.me/2017/07/26/AFNetwoking源码——基本架构/';
+(function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();</script><script id="dsq-count-scr" src="//angrypowman.disqus.com/count.js" async></script></main><footer class="footer-container"><div class="paginator"><a href="/2017/07/24/iOS核心动画/" class="next">NEXT</a></div><div class="copyright"><p>© 2017 <a href="http://www.nineteen.me">郑祯</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/AngryPowman/hexo-theme-prontera" target="_blank">hexo-theme-prontera</a>.</p></div></footer><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"angrypowman",'auto');ga('send','pageview');</script></body></html>
