@@ -1,0 +1,37 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> AFNetworking源码——多线程 · Nineteen</title><meta name="description" content="AFNetworking源码——多线程 - 郑祯"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/css/prontera.css"><link rel="search" type="application/opensearchdescription+xml" href="http://www.nineteen.me/atom.xml" title="Nineteen"></head><body><header class="feature-header"><nav class="component-nav"><ul><div class="logo-container"><a href="/"><h2 class="title">Nineteen</h2></a></div><a href="/" target="_self" class="li component-nav-item"><p>INDEX</p></a><a href="/archives" target="_self" class="li component-nav-item"><p>ARCHIVES</p></a><a href="/about" target="_self" class="li component-nav-item"><p>ME</p></a><ul class="shortcut-icons"><a href="http://www.jianshu.com/u/dd2dfc34332d" target="_blank"><img src="/images/jianshu.svg" class="icon"></a><a href="http://weibo.com/5458978084/profile?rightmod=1&amp;wvr=6&amp;mod=personinfo&amp;is_all=1" target="_blank"><img src="/images/weibo.svg" class="icon"></a><a href="https://github.com/NtZheng" target="_blank"><img src="/images/github.svg" class="icon"></a></ul></ul></nav></header><main class="container"><div id="post-container"><div class="post"><article class="post-block"><h1 class="post-title">AFNetworking源码——多线程</h1><div class="post-info">Jul 29, 2017</div><div class="post-content"><p>由于AFNetworking本质上是对NSURLConnection和NSURLSession进行了封装设计，作为一个优秀网络请求框架，必然对多线程这一块的处理有自己的良好设计，本文分别探究2.0和3.0时代对于多线程的设计方案<br><img src="http://upload-images.jianshu.io/upload_images/2070409-4a6c14e87c12f262.jpeg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""><br><a id="more"></a></p>
+<h3 id="AFNetworking-2-0"><a href="#AFNetworking-2-0" class="headerlink" title="AFNetworking 2.0"></a>AFNetworking 2.0</h3><p>对于2.0时代，框架采用了NSURLConnection+NSOperation的模型，那么来分析一下AF是如何进行请求的管理，以及回调的处理的，我们尝试列出几种方案：</p>
+<ul>
+<li><p><strong>所有请求都在主线程中发送，并且回调处理也有主线程来完成</strong><br>这应该是最直接的方式，那我们来看下这个方式有什么不好的地方</p>
+<ul>
+<li>如果请求数量很多，那么主线程会消耗大量的CPU资源来做请求的发送和回调的处理，对于这么注重流畅度的iOS，该方法直接被淘汰了</li>
+</ul>
+</li>
+<li><p><strong>开启一条子线程，在子线程中进行请求的同步发送，并且等待回调</strong><br>利用子线程做处理，就不会有上述问题，但是仍然存在一些不好的地方</p>
+<ul>
+<li>子线程由于需要接受回调，所以需要使用runLoop进行线程保活，这样即使回调完成，线程资源仍然得不到释放，如果请求数量很多，就意味着开辟很多条子线程，造成大量的资源浪费</li>
+</ul>
+</li>
+<li><p><strong>AF的方案：启用一个子线程，异步发送请求，处理回调事件</strong><br>通俗来说，就是开辟一条专门用于请求管理的线程，下面为2.0中的源码</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[self performSelector:@selector(operationDidStart)</div><div class="line">			  onThread:[[self class] networkRequestThread] 			withObject:nil</div><div class="line">		 waitUntilDone:NO</div><div class="line">		         modes:[self.runLoopModes allObjects]]</div></pre></td></tr></table></figure>
+<h3 id="AFNetworking-3-0"><a href="#AFNetworking-3-0" class="headerlink" title="AFNetworking 3.0"></a>AFNetworking 3.0</h3><p>AF的3.0时代进行了大改动，其内部实现从基于NSURLConnection变成了NSURLSession，在3.0的<a href="http://www.jianshu.com/p/b09b82a93bbc" target="_blank" rel="external">设计思路</a>这这篇文章中解析了3.0是如何对NSURLSession进行封装的，这里我们直接看一下对应的源码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">self.operationQueue = [[NSOperationQueue alloc] init];</div><div class="line">self.operationQueue.maxConcurrentOperationCount = 1;</div><div class="line">self.session = [NSURLSession sessionWithConfiguration:self.sessionConfiguration delegate:self delegateQueue:self.operationQueue];</div></pre></td></tr></table></figure>
+<ul>
+<li>3.0以AFURLSessionManager为核心类，每个对象都拥有一个NSOperationQueue用于请求发送和回调管理（可以发现是一个串行队列）</li>
+<li>如果要转化为NSURLSession，那么就相当于每个session拥有一个NSOperationQueue，然后一个session可以创建多个任务，这些任务是在串行队列中执行</li>
+</ul>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>之所以设计方式不同了，有原因来自：2.0时代的NSURLConnection是一个全局的设计，从调用方式也能发现：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:@&quot;www.nineteen.me&quot;]];</div><div class="line">[NSURLConnection sendAsynchronousRequest:request queue:[[NSOperationQueue alloc]init] completionHandler:^(NSURLResponse * __nullable response, NSData * __nullable data, NSError * __nullable connectionError) &#123;</div><div class="line">    // ...</div><div class="line">&#125;];</div></pre></td></tr></table></figure>
+<p>而NSURLSession是将Session和task进行了分离，可以从使用看出：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];</div><div class="line">NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration</div><div class="line">                                                      delegate:self</div><div class="line">                                                 delegateQueue:[NSOperationQueue mainQueue]];</div><div class="line">NSURLSessionDataTask *task = [session dataTaskWithURL:[[NSURL alloc]initWithString:@&quot;&quot;]];</div><div class="line">[task resume];</div></pre></td></tr></table></figure>
+<p>这样的设计就能够为每个session对象（AFURLSessionManager对象）添加独自的操作队列NSOperationQueue，分别进行各自的请求发送和回调管理。而2.0中使用全局设计，因此AF维护一条子线程专门用于管理所有的请求发送和回调处理。</p>
+</div></article></div><div id="disqus_thread"></div></div><script>var disqus_shortname = 'angrypowman';
+var disqus_identifier = '2017/07/29/AFNetworking源码——多线程/';
+var disqus_title = 'AFNetworking源码——多线程';
+var disqus_url = 'http://www.nineteen.me/2017/07/29/AFNetworking源码——多线程/';
+(function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();</script><script id="dsq-count-scr" src="//angrypowman.disqus.com/count.js" async></script></main><footer class="footer-container"><div class="paginator"><a href="/2017/07/28/AFNetworking源码——基本架构/" class="next">下一篇</a></div><div class="copyright"><p>© 2017 <a href="http://www.nineteen.me">郑祯</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/AngryPowman/hexo-theme-prontera" target="_blank">hexo-theme-prontera</a>.</p></div></footer><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"angrypowman",'auto');ga('send','pageview');</script></body></html>
