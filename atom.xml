@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.nineteen.me/"/>
-  <updated>2017-07-29T00:48:24.000Z</updated>
+  <updated>2017-08-04T02:05:24.000Z</updated>
   <id>http://www.nineteen.me/</id>
   
   <author>
@@ -14,6 +14,106 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Masonry源码——准备知识</title>
+    <link href="http://www.nineteen.me/2017/08/04/Masonry%E6%BA%90%E7%A0%81%E2%80%94%E2%80%94%E5%87%86%E5%A4%87%E7%9F%A5%E8%AF%86/"/>
+    <id>http://www.nineteen.me/2017/08/04/Masonry源码——准备知识/</id>
+    <published>2017-08-04T02:04:04.000Z</published>
+    <updated>2017-08-04T02:05:24.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>Masonry是一个用于布局的轻量级开源框架，我们一般使用它来代替苹果原生的AutoLayout代码，使得代码更加舒适简洁。Masonry框架虽然很轻量，但是代码中使用了大量的block和链式编程的技巧，所以想要阅读Masonry框架源码，需要掌握这两方面的知识<br><a id="more"></a></p>
+<h4 id="Block的常见使用"><a href="#Block的常见使用" class="headerlink" title="Block的常见使用"></a>Block的常见使用</h4><ul>
+<li><strong>声明block类型变量</strong></li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">int (^test)(int) = ^(int a) &#123;</div><div class="line">    return a + 1;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<ul>
+<li><strong>block作为函数参数</strong></li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">- (void)test :(void (^)(NSString *a)) block &#123;</div><div class="line">    </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li><strong>block作为函数返回值</strong></li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">- (void (^)(NSString *))block &#123;</div><div class="line">    return ^(NSString *a) &#123;</div><div class="line">        NSLog(@&quot;%@&quot;,a);</div><div class="line">    &#125;;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>有时候我们也可以使用typedef来简化block</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">typedef void(^block)(NSString *a);</div><div class="line"></div><div class="line">- (block)block &#123;</div><div class="line">    return ^(NSString *a) &#123;</div><div class="line">        NSLog(@&quot;%@&quot;,a);</div><div class="line">    &#125;;</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)test :(block) block &#123;</div><div class="line">    </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="链式编程思想"><a href="#链式编程思想" class="headerlink" title="链式编程思想"></a>链式编程思想</h4><p>很多地方总会将链式编程和函数式编程结合在一起来谈论，这里先简单说明下两者的区别</p>
+<ul>
+<li><strong>函数式编程</strong>：<br>将函数作为和其他数据类型一样来进行操作，可以作为其他函数的参数和返回值等，例如：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">method1(method2(method3(3)));</div></pre></td></tr></table></figure>
+<ul>
+<li><strong>链式编程</strong><br>用点的形式连接函数，完成参数的传递和逻辑处理，例如：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">make.top.equalTo(self.view).with.offset(5);</div></pre></td></tr></table></figure>
+<p><strong>接着我们来看链式编程是如何实现的</strong><br>还是用一个最经典的例子来看，那就是计算器，我们先来看看整体的代码，再逐步分析</p>
+<ul>
+<li><strong>.h文件</strong></li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">@property (nonatomic, assign) NSInteger result;</div><div class="line"></div><div class="line">+ (NSInteger)makeCalculator :(void(^)(Calculator * make)) block;</div><div class="line"></div><div class="line">- (Calculator * (^) (NSInteger))add;</div><div class="line">- (Calculator * (^) (NSInteger))sub;</div><div class="line">- (Calculator *)printResult;</div></pre></td></tr></table></figure>
+<ul>
+<li><strong>.m文件</strong></li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">+ (NSInteger)makeCalculator:(void (^)(Calculator * make))block &#123;</div><div class="line">    Calculator *calculator = [[Calculator alloc]init];</div><div class="line">    block(calculator);</div><div class="line">    return calculator.result;</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (Calculator *(^)(NSInteger))add &#123;</div><div class="line">    return ^(NSInteger temp) &#123;</div><div class="line">        self.result += temp;</div><div class="line">        return self;</div><div class="line">    &#125;;</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (Calculator *(^)(NSInteger))sub &#123;</div><div class="line">    return ^(NSInteger temp) &#123;</div><div class="line">        self.result -= temp;</div><div class="line">        return self;</div><div class="line">    &#125;;</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (Calculator *)printResult &#123;</div><div class="line">    NSLog(@&quot;%ld&quot;,(long)self.result);</div><div class="line">    return self;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li><strong>使用</strong></li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[Calculator makeCalculator:^(Calculator *make) &#123;</div><div class="line">    make.add(2).sub(1).printResult.sub(3);</div><div class="line">&#125;];</div></pre></td></tr></table></figure>
+<p>看.h文件，有一个result成员属性来存储结果，方法大致分为了三种</p>
+<ul>
+<li><strong>类方法：makeCalculator</strong><ul>
+<li>使用了block做参数，block中有一个Calculator对象</li>
+<li>在实现中：<ul>
+<li>初始化Calculator对象</li>
+<li>交付给block作为参数</li>
+<li>返回值为成员变量result</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>返回block的方法：add、sub</strong><ul>
+<li>使用了block作为返回值</li>
+<li>实现中：<ul>
+<li>操作成员变量result</li>
+<li>返回自身（链式编程的核心）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>返回对象的方法：printResult</strong><ul>
+<li>返回自身对象（满足链式编程）</li>
+<li>打印操作</li>
+</ul>
+</li>
+</ul>
+<p>在看使用的代码</p>
+<ul>
+<li><strong>类方法的调用</strong></li>
+<li><strong>链中的方法</strong>：<code>make.add(2).sub(1).printResult.sub(3);</code><br>可以发现在链中的调用都是通过点进行的，但是在OC中都是通过<br>[object method] 的形式调用的，这里分为两种：<ul>
+<li><strong>返回值为block的方法</strong>：<ul>
+<li>首先该方法返回值是一个block，调用起来相当于getter方法，所以等价于一个block的属性<code>@property (nonatomic, readonly) Calculator * (^add) (NSInteger);</code></li>
+<li><em>调用过程可以分为两步</em>：</li>
+<li>第一步：<code>(Calculator * (^)(NSInteger)) tempBlock = make.add;</code>这里make.add是获取了属性</li>
+<li>第二步：<code>tempBlock(2);</code></li>
+</ul>
+</li>
+<li><strong>返回值为对象的方法</strong>：<ul>
+<li>在OC中，如果符合getter方法的格式，则可以通过点语法进行调用</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Masonry是一个用于布局的轻量级开源框架，我们一般使用它来代替苹果原生的AutoLayout代码，使得代码更加舒适简洁。Masonry框架虽然很轻量，但是代码中使用了大量的block和链式编程的技巧，所以想要阅读Masonry框架源码，需要掌握这两方面的知识&lt;br&gt;
+    
+    </summary>
+    
+    
+  </entry>
   
   <entry>
     <title>AFNetworking源码——多线程</title>
