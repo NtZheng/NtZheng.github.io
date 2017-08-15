@@ -1,0 +1,119 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> 细说GCD · Nineteen</title><meta name="description" content="细说GCD - 郑祯"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/css/prontera.css"><link rel="search" type="application/opensearchdescription+xml" href="http://www.nineteen.me/atom.xml" title="Nineteen"></head><body><header class="feature-header"><nav class="component-nav"><ul><div class="logo-container"><a href="/"><h2 class="title">Nineteen</h2></a></div><a href="/" target="_self" class="li component-nav-item"><p>INDEX</p></a><a href="/archives" target="_self" class="li component-nav-item"><p>ARCHIVES</p></a><a href="/about" target="_self" class="li component-nav-item"><p>ME</p></a><ul class="shortcut-icons"><a href="http://www.jianshu.com/u/dd2dfc34332d" target="_blank"><img src="/images/jianshu.svg" class="icon"></a><a href="http://weibo.com/5458978084/profile?rightmod=1&amp;wvr=6&amp;mod=personinfo&amp;is_all=1" target="_blank"><img src="/images/weibo.svg" class="icon"></a><a href="https://github.com/NtZheng" target="_blank"><img src="/images/github.svg" class="icon"></a></ul></ul></nav></header><main class="container"><div id="post-container"><div class="post"><article class="post-block"><h1 class="post-title">细说GCD</h1><div class="post-info">Aug 15, 2017</div><div class="post-content"><p>GCD是多线程编程中很常用的技术，同时，作为一项重要的知识点，在面试中也是“常来之客”，本文通过API进行GCD的归纳和总结<br><a id="more"></a><br><img src="http://upload-images.jianshu.io/upload_images/2070409-b070ca5d73c382d9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<h4 id="GCD之前"><a href="#GCD之前" class="headerlink" title="GCD之前"></a>GCD之前</h4><p>在苹果引入GCD技术之前，Cocoa框架中的NSObject类提供了<code>performSelectorInBackground:withObject</code>和<code>performSelectorOnMainThread</code>等来实现多线程编程，此外还有NSThread、NSOperation等，伴随GCD的诞生，NSOperation也进行重写，基于GCD实现</p>
+<h4 id="关于多线程编程"><a href="#关于多线程编程" class="headerlink" title="关于多线程编程"></a>关于多线程编程</h4><p>一个CPU一次只能执行一个命令，这样连续执行命令，相当于一条无分叉的路径，这样的路径就是“线程”。OS和iOS的核心XNU内核在进行操作系统事件处理的时候，会切换执行路径。每条执行路径的状态，会保存到每条路径专用的内存块中，便于下次执行时复原信息。这种来回切换的操作可以被称为“上下文切换”，也正是这种切换产生了多线程。</p>
+<h4 id="多线程需要注意的问题"><a href="#多线程需要注意的问题" class="headerlink" title="多线程需要注意的问题"></a>多线程需要注意的问题</h4><ul>
+<li>数据不一致：例如，两个线程同时更新一个数据</li>
+<li>死锁：两个线程互相等待对方执行结束</li>
+<li>内存消耗：线程过多会消耗大量内存<br>…</li>
+</ul>
+<h4 id="GCD的API"><a href="#GCD的API" class="headerlink" title="GCD的API"></a>GCD的API</h4><blockquote>
+<p>dispatch_queue_t</p>
+</blockquote>
+<p>分为两种</p>
+<ul>
+<li><code>Serial Dispatch Queue</code>：串行队列<ul>
+<li><strong>系统提供的</strong>：<code>dispatch_get_main_queue</code></li>
+<li><strong>自定义创建</strong>：<code>dispatch_queue_create(&quot;name&quot;, DISPATCH_QUEUE_SERIAL)</code>其中的name是该queue的名字</li>
+</ul>
+</li>
+<li><code>Concurrent Dispatch Queue</code>：并行队列<ul>
+<li><strong>系统提供的</strong>：<code>dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT，0)</code>其中第一个参数有四种，对应不同优先级<ul>
+<li><code>DISPATCH_QUEUE_PRIORITY_BACKGROUND</code></li>
+<li><code>DISPATCH_QUEUE_PRIORITY_LOW</code></li>
+<li><code>DISPATCH_QUEUE_PRIORITY_DEFAULT</code></li>
+<li><code>DISPATCH_QUEUE_PRIORITY_HIGH</code></li>
+</ul>
+</li>
+<li><strong>自定义创建</strong>：<code>dispatch_queue_create(&quot;name&quot;，DISPATCH_QUEUE_CONCURRENT)</code></li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>dispatch_set_target_queue</p>
+</blockquote>
+<ul>
+<li><p><code>dispatch_queue_create</code>生成的<code>dispatch_queue_t</code>的优先级都是默认优先级，如果想要改变优先级可以使用：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">dispatch_queue_t queue1 = dispatch_queue_create(&quot;name&quot;, DISPATCH_QUQUE_SERIAL);</div><div class="line">dispatch_queue_t queue2 = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND);</div><div class="line">dispatch_set_target_queue(queue1, queue2);</div></pre></td></tr></table></figure>
+</li>
+<li><p>同时如果将多个串行队列的目标制定为同一个串行队列，那么本应该并行执行的各个串行队列只能串行地进行执行</p>
+</li>
+</ul>
+<blockquote>
+<p>dispatch_after</p>
+</blockquote>
+<p>在指定时间之后执行处理，本质上是在指定时间之后将任务追加到队列中</p>
+<blockquote>
+<p>dispatch_group_t</p>
+</blockquote>
+<p>队列组可以用来实现：当所有处理结束之后，执行一个操作。正常来说使用串行队列是很容易实现的，但是如果是并行队列的话，想要实现这个操作，就需要借助队列组来实现</p>
+<blockquote>
+<p>dispatch_group_wait</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">long result = dispatch_group_wait(group, time);</div></pre></td></tr></table></figure>
+<ul>
+<li>该函数会阻塞当前线程（即代码所处的线程）</li>
+<li>time的选择<ul>
+<li>可以是一个固定的时间，如果超时了，该函数就会返回</li>
+<li>也可以是DISPATCH_TIME_FOREVER，表示一直等待，直到group中所有操作执行完毕，函数才返回。</li>
+</ul>
+</li>
+<li>返回值<ul>
+<li>0：代表group中的任务全部执行完了</li>
+<li>非0：代表超时了</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>dispatch_barrier_async</p>
+</blockquote>
+<p>一般来说，关于数据库的操作，使用串行队列能够避免数据异常的问题。但是实际上，读取操作之间是没有影响的，为了提高效率，读取操作通过是并行的，只需要保证写操作的时候，没有任何一个读取操作在进行即可。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">dispatch_async(queue, block_reading1);</div><div class="line">dispatch_async(queue, block_reading2);</div><div class="line">dispatch_barrier_async(queue, block_writing);</div><div class="line">dispatch_async(queue, block_reading3);</div><div class="line">dispatch_async(queue, block_reading4);</div></pre></td></tr></table></figure>
+<p>以上代码中的写操作，会等待上面代码中的读操作（已经被添加到队列中的任务）执行完毕之后，开始执行，此时，写操作以下的代码中的读操作需要的等待写操作执行完之后才能添加到队列中执行</p>
+<blockquote>
+<p>dispatch_async和dispatch_sync</p>
+</blockquote>
+<ul>
+<li><code>dispatch_async</code>是异步执行，代表不会阻塞当前线程，会另外开辟线程执行任务</li>
+<li><code>dispatch_sync</code>是同步执行，代表会阻塞当前线程，会在当前线程执行任务</li>
+</ul>
+<blockquote>
+<p>dispatch_apply</p>
+</blockquote>
+<p>该函数可以将block中的任务指定次数加入到队列中，并且会阻塞当前线程，直到所有的任务全部执行完</p>
+<blockquote>
+<p>dispatch_suspend和dispatch_resume</p>
+</blockquote>
+<ul>
+<li><code>dispatch_suspend</code>：挂起后，添加到队列中的任务，尚未执行的处理都会停止执行</li>
+<li><code>dispatch_resume</code>：将会恢复以上操作</li>
+</ul>
+<blockquote>
+<p>dispatch_semaphore_t</p>
+</blockquote>
+<p>GCD中的信号量，用于控制并行执行，在GCD中，控制并行可以通串行队列和dispatch_barrier_async来做，而信号量semaphore可以更加精确地控制并行</p>
+<ul>
+<li><code>dispatch_semaphore_create(number )</code>：number为信号量的初始量</li>
+<li><code>dispatch_semaphore_wait(semaphore, time)</code><ul>
+<li>其中time和group中是一样的</li>
+<li>返回值：<ul>
+<li>0：如果信号量大于等于1，返回0，同时将信息号量减去1</li>
+<li>非0：超过指定时间（同时这时信号量为0）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>dispatch_semaphore_signal(semaphore)</code>：将信号量+1</li>
+</ul>
+<blockquote>
+<p>dispatch_once</p>
+</blockquote>
+<p>用于单例处理，相关代码只会执行一次（即使在多核情况下，也是安全的）</p>
+</div></article></div><div id="disqus_thread"></div></div><script>var disqus_shortname = 'angrypowman';
+var disqus_identifier = '2017/08/15/细说GCD/';
+var disqus_title = '细说GCD';
+var disqus_url = 'http://www.nineteen.me/2017/08/15/细说GCD/';
+(function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();</script><script id="dsq-count-scr" src="//angrypowman.disqus.com/count.js" async></script></main><footer class="footer-container"><div class="paginator"><a href="/2017/08/04/Masonry源码——准备知识/" class="next">NEXT</a></div><div class="copyright"><p>© 2017 <a href="http://www.nineteen.me">郑祯</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/AngryPowman/hexo-theme-prontera" target="_blank">hexo-theme-prontera</a>.</p></div></footer><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"angrypowman",'auto');ga('send','pageview');</script></body></html>
