@@ -1,0 +1,30 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> UITableView性能调优 · Nineteen</title><meta name="description" content="UITableView性能调优 - 郑祯"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/css/prontera.css"><link rel="search" type="application/opensearchdescription+xml" href="http://www.nineteen.me/atom.xml" title="Nineteen"></head><body><header class="feature-header"><nav class="component-nav"><ul><div class="logo-container"><a href="/"><h2 class="title">Nineteen</h2></a></div><a href="/" target="_self" class="li component-nav-item"><p>INDEX</p></a><a href="/archives" target="_self" class="li component-nav-item"><p>ARCHIVES</p></a><a href="/about" target="_self" class="li component-nav-item"><p>ME</p></a><ul class="shortcut-icons"><a href="http://www.jianshu.com/u/dd2dfc34332d" target="_blank"><img src="/images/jianshu.svg" class="icon"></a><a href="http://weibo.com/5458978084/profile?rightmod=1&amp;wvr=6&amp;mod=personinfo&amp;is_all=1" target="_blank"><img src="/images/weibo.svg" class="icon"></a><a href="https://github.com/NtZheng" target="_blank"><img src="/images/github.svg" class="icon"></a></ul></ul></nav></header><main class="container"><div id="post-container"><div class="post"><article class="post-block"><h1 class="post-title">UITableView性能调优</h1><div class="post-info">Aug 16, 2017</div><div class="post-content"><p>UITableView几乎是最常用的控件之一，在开发中，经常需要对UITableView进行性能调优，提高用户体验<br><a id="more"></a></p>
+<h4 id="最基本的规则"><a href="#最基本的规则" class="headerlink" title="最基本的规则"></a>最基本的规则</h4><ul>
+<li>cell的复用</li>
+<li><code>heightForRowAtIndexPath</code>在<code>cellForRowAtIndexPath</code>之前调用，遵循UIScrollView中必须先计算contentSize<ul>
+<li><code>cellForRowAtIndexPath</code>：仅仅当cell显示的时候才会调用</li>
+<li><code>heightForRowAtIndexPath</code>：<ol>
+<li>初始化的时候，如果有N行，那么会执行N次</li>
+<li>调用reloadData方法，又会执行N次</li>
+<li>显示的cell又会调用该方法</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="尽量少的cell种类"><a href="#尽量少的cell种类" class="headerlink" title="尽量少的cell种类"></a>尽量少的cell种类</h4><p>由于复用机制的存在，假设cell有M种，一个屏幕能容下的cell个数为N个，那么缓冲池中将会最多存在M x N个cell对象，而如果只有一种cell的话，最多只会有N个对象在缓存池中</p>
+<h4 id="定高的cell使用rowHeight"><a href="#定高的cell使用rowHeight" class="headerlink" title="定高的cell使用rowHeight"></a>定高的cell使用rowHeight</h4><p>如果所有cell是统一高度的，那么避免使用代理方法去执行多次，直接设置rowHeight属性即可</p>
+<h4 id="提前计算并缓存cell的高度"><a href="#提前计算并缓存cell的高度" class="headerlink" title="提前计算并缓存cell的高度"></a>提前计算并缓存cell的高度</h4><p>在基本规则中可以看到，<code>heightForRowAtIndexPath</code>方法会调用非常多的次数，如果将高度计算放在方法中，那么可想而知，CPU会存在大量的消耗。所以，对于cell高度的计算，应该在从网络获取到数据的时候就进行计算，并且把计算的结果缓存起来。具体的做法，可以在数据模型model对象中添加一个cell高度的属性，但是通常model类一般没有实现，就只有属性，所以最好的方式是添加到viewModel中。</p>
+<h4 id="提前创建并缓存真正需要显示的数据"><a href="#提前创建并缓存真正需要显示的数据" class="headerlink" title="提前创建并缓存真正需要显示的数据"></a>提前创建并缓存真正需要显示的数据</h4><p>有些从服务器中拿到的数据，并不能用于视图的显示，这些数据需要做一些处理才能用于视图显示。同样，我们可以在基本规则中看到，<code>cellForRowAtIndexPath</code>也会执行多次，所以这些处理不应该直接放在该方法中。而应该在从网络获取到数据的时候就进行处理，同时缓存起来作为一个属性。通常这也是MVVM模式中VM所做的操作之一。</p>
+<h4 id="按需加载cell"><a href="#按需加载cell" class="headerlink" title="按需加载cell"></a>按需加载cell</h4><p>在滑动的过程中，计算滚动目标范围内的cell进行加载，而不加载滑动过程中的cell，通过监听UIScrollView的代理方法来完成</p>
+<h4 id="避免使用透明图层"><a href="#避免使用透明图层" class="headerlink" title="避免使用透明图层"></a>避免使用透明图层</h4><p>设置图层透明，系统会将透明图层和下面的视图进行混合，而这种操作属于渲染操作中很慢的操作</p>
+<h4 id="异步绘制"><a href="#异步绘制" class="headerlink" title="异步绘制"></a>异步绘制</h4><p>如果自定义cell的时候存在大量的子控件，那么这时候需要选择使用异步绘制，来防止创建多个子对象，耗费CPU资源。开启子线程直接绘制元素而非创建对象。除此之外还可以通过重写drawRect方法进行元素的绘制，drawRect方法本身是异步的。</p>
+</div></article></div><div id="disqus_thread"></div></div><script>var disqus_shortname = 'angrypowman';
+var disqus_identifier = '2017/08/16/UITableView性能调优/';
+var disqus_title = 'UITableView性能调优';
+var disqus_url = 'http://www.nineteen.me/2017/08/16/UITableView性能调优/';
+(function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();</script><script id="dsq-count-scr" src="//angrypowman.disqus.com/count.js" async></script></main><footer class="footer-container"><div class="paginator"><a href="/2017/08/15/细说GCD/" class="next">NEXT</a></div><div class="copyright"><p>© 2017 <a href="http://www.nineteen.me">郑祯</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/AngryPowman/hexo-theme-prontera" target="_blank">hexo-theme-prontera</a>.</p></div></footer><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"angrypowman",'auto');ga('send','pageview');</script></body></html>

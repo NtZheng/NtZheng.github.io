@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.nineteen.me/"/>
-  <updated>2017-08-16T01:19:16.000Z</updated>
+  <updated>2017-08-16T13:48:02.000Z</updated>
   <id>http://www.nineteen.me/</id>
   
   <author>
@@ -14,6 +14,45 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>UITableView性能调优</title>
+    <link href="http://www.nineteen.me/2017/08/16/UITableView%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/"/>
+    <id>http://www.nineteen.me/2017/08/16/UITableView性能调优/</id>
+    <published>2017-08-16T13:47:31.000Z</published>
+    <updated>2017-08-16T13:48:02.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>UITableView几乎是最常用的控件之一，在开发中，经常需要对UITableView进行性能调优，提高用户体验<br><a id="more"></a></p>
+<h4 id="最基本的规则"><a href="#最基本的规则" class="headerlink" title="最基本的规则"></a>最基本的规则</h4><ul>
+<li>cell的复用</li>
+<li><code>heightForRowAtIndexPath</code>在<code>cellForRowAtIndexPath</code>之前调用，遵循UIScrollView中必须先计算contentSize<ul>
+<li><code>cellForRowAtIndexPath</code>：仅仅当cell显示的时候才会调用</li>
+<li><code>heightForRowAtIndexPath</code>：<ol>
+<li>初始化的时候，如果有N行，那么会执行N次</li>
+<li>调用reloadData方法，又会执行N次</li>
+<li>显示的cell又会调用该方法</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="尽量少的cell种类"><a href="#尽量少的cell种类" class="headerlink" title="尽量少的cell种类"></a>尽量少的cell种类</h4><p>由于复用机制的存在，假设cell有M种，一个屏幕能容下的cell个数为N个，那么缓冲池中将会最多存在M x N个cell对象，而如果只有一种cell的话，最多只会有N个对象在缓存池中</p>
+<h4 id="定高的cell使用rowHeight"><a href="#定高的cell使用rowHeight" class="headerlink" title="定高的cell使用rowHeight"></a>定高的cell使用rowHeight</h4><p>如果所有cell是统一高度的，那么避免使用代理方法去执行多次，直接设置rowHeight属性即可</p>
+<h4 id="提前计算并缓存cell的高度"><a href="#提前计算并缓存cell的高度" class="headerlink" title="提前计算并缓存cell的高度"></a>提前计算并缓存cell的高度</h4><p>在基本规则中可以看到，<code>heightForRowAtIndexPath</code>方法会调用非常多的次数，如果将高度计算放在方法中，那么可想而知，CPU会存在大量的消耗。所以，对于cell高度的计算，应该在从网络获取到数据的时候就进行计算，并且把计算的结果缓存起来。具体的做法，可以在数据模型model对象中添加一个cell高度的属性，但是通常model类一般没有实现，就只有属性，所以最好的方式是添加到viewModel中。</p>
+<h4 id="提前创建并缓存真正需要显示的数据"><a href="#提前创建并缓存真正需要显示的数据" class="headerlink" title="提前创建并缓存真正需要显示的数据"></a>提前创建并缓存真正需要显示的数据</h4><p>有些从服务器中拿到的数据，并不能用于视图的显示，这些数据需要做一些处理才能用于视图显示。同样，我们可以在基本规则中看到，<code>cellForRowAtIndexPath</code>也会执行多次，所以这些处理不应该直接放在该方法中。而应该在从网络获取到数据的时候就进行处理，同时缓存起来作为一个属性。通常这也是MVVM模式中VM所做的操作之一。</p>
+<h4 id="按需加载cell"><a href="#按需加载cell" class="headerlink" title="按需加载cell"></a>按需加载cell</h4><p>在滑动的过程中，计算滚动目标范围内的cell进行加载，而不加载滑动过程中的cell，通过监听UIScrollView的代理方法来完成</p>
+<h4 id="避免使用透明图层"><a href="#避免使用透明图层" class="headerlink" title="避免使用透明图层"></a>避免使用透明图层</h4><p>设置图层透明，系统会将透明图层和下面的视图进行混合，而这种操作属于渲染操作中很慢的操作</p>
+<h4 id="异步绘制"><a href="#异步绘制" class="headerlink" title="异步绘制"></a>异步绘制</h4><p>如果自定义cell的时候存在大量的子控件，那么这时候需要选择使用异步绘制，来防止创建多个子对象，耗费CPU资源。开启子线程直接绘制元素而非创建对象。除此之外还可以通过重写drawRect方法进行元素的绘制，drawRect方法本身是异步的。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;UITableView几乎是最常用的控件之一，在开发中，经常需要对UITableView进行性能调优，提高用户体验&lt;br&gt;
+    
+    </summary>
+    
+    
+  </entry>
   
   <entry>
     <title>细说GCD</title>
