@@ -47,6 +47,13 @@
 </blockquote>
 <p>队列组可以用来实现：当所有处理结束之后，执行一个操作。正常来说使用串行队列是很容易实现的，但是如果是并行队列的话，想要实现这个操作，就需要借助队列组来实现</p>
 <blockquote>
+<p>dispatch_group_notify</p>
+</blockquote>
+<ul>
+<li>用于group中所有任务执行完之后追加一个操作执行</li>
+<li>该方法不会阻塞当前线程</li>
+</ul>
+<blockquote>
 <p>dispatch_group_wait</p>
 </blockquote>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">long result = dispatch_group_wait(group, time);</div></pre></td></tr></table></figure>
@@ -116,4 +123,4 @@ var disqus_url = 'http://www.nineteen.me/2017/08/15/细说GCD/';
     var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
     dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
     (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-})();</script><script id="dsq-count-scr" src="//angrypowman.disqus.com/count.js" async></script></main><footer class="footer-container"><div class="paginator"><a href="/2017/08/04/Masonry源码——准备知识/" class="next">NEXT</a></div><div class="copyright"><p>© 2017 <a href="http://www.nineteen.me">郑祯</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/AngryPowman/hexo-theme-prontera" target="_blank">hexo-theme-prontera</a>.</p></div></footer><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"angrypowman",'auto');ga('send','pageview');</script></body></html>
+})();</script><script id="dsq-count-scr" src="//angrypowman.disqus.com/count.js" async></script></main><footer class="footer-container"><div class="paginator"><a href="/2017/08/04/Masonry源码——准备知识/" class="next">下一篇</a></div><div class="copyright"><p>© 2017 <a href="http://www.nineteen.me">郑祯</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/AngryPowman/hexo-theme-prontera" target="_blank">hexo-theme-prontera</a>.</p></div></footer><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"angrypowman",'auto');ga('send','pageview');</script></body></html>
