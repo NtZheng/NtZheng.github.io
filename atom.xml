@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.nineteen.me/"/>
-  <updated>2017-08-27T11:20:45.000Z</updated>
+  <updated>2017-08-28T10:28:22.000Z</updated>
   <id>http://www.nineteen.me/</id>
   
   <author>
@@ -14,6 +14,36 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>找零钱</title>
+    <link href="http://www.nineteen.me/2017/08/28/%E6%89%BE%E9%9B%B6%E9%92%B1/"/>
+    <id>http://www.nineteen.me/2017/08/28/找零钱/</id>
+    <published>2017-08-28T10:28:02.000Z</published>
+    <updated>2017-08-28T10:28:22.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>给定一个数组，数组中为不同的数代表不同钱的面值，同时给定一个需要兑换零钱的钱数，任意使用不同面值不同数量的钱来兑换，求一共有多少种方法<br><a id="more"></a></p>
+<h5 id="解法一："><a href="#解法一：" class="headerlink" title="解法一："></a>解法一：</h5><ul>
+<li><strong>思路</strong>：暴力递归</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">int operation1(vector&lt;int&gt; A, int index, int aim) &#123;</div><div class="line">    int result = 0;</div><div class="line">    if (index == A.size()) &#123;</div><div class="line">        result = aim == 0 ? 1 : 0;</div><div class="line">    &#125; else &#123;</div><div class="line">        for (int i = 0; i * A[index] &lt;= aim; i++) &#123;</div><div class="line">            result += operation1(A, index + 1, aim - A[index] * i);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    return result;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h5 id="解法二："><a href="#解法二：" class="headerlink" title="解法二："></a>解法二：</h5><ul>
+<li><strong>思路</strong>：记忆法，由于暴力递归中存在很多重复计算，所以记忆法使用一个二维数组去记录递归的结果值，避免了大量重复计算</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">int operation2(vector&lt;int&gt; A, int index, int aim, vector&lt;vector&lt;int&gt;&gt; &amp;map) &#123;</div><div class="line">    int result = 0;</div><div class="line">    if (index == A.size()) &#123;</div><div class="line">        result = aim == 0 ? 1 : 0;</div><div class="line">    &#125; else &#123;</div><div class="line">        int mapValue = 0;</div><div class="line">        for (int i = 0; i * A[index] &lt;= aim; i++) &#123;</div><div class="line">            mapValue = map[index + 1][aim - i * A[index]];</div><div class="line">            if (mapValue == -1) &#123;</div><div class="line">                result += operation2(A, index + 1, aim - i * A[index], map);</div><div class="line">            &#125; else &#123;</div><div class="line">                result += mapValue;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    map[index][aim] = result;</div><div class="line">    return result;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h5 id="解法三："><a href="#解法三：" class="headerlink" title="解法三："></a>解法三：</h5><ul>
+<li><strong>思路</strong>：动态规划，记忆法只是简单地记录了递归的结果集，动态规划去寻找了结果集的计算顺序，找出关系，利用递推的公式去代替枚举过程</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">int operation3(vector&lt;int&gt; A, int aim, vector&lt;vector&lt;int&gt;&gt; &amp;dp) &#123;</div><div class="line">    // 初始化DP矩阵的第一列</div><div class="line">    for (int i = 0; i &lt; A.size(); i++) &#123;</div><div class="line">        dp[i][0] = 1;</div><div class="line">    &#125;</div><div class="line">    // 初始化DP矩阵的第一行</div><div class="line">    for (int i = 0; i &lt;= aim; i++) &#123;</div><div class="line">        if (i % A[0] == 0) &#123;</div><div class="line">            dp[0][i] = 1;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    // DP过程</div><div class="line">    for (int i = 1; i &lt; A.size(); i++) &#123;</div><div class="line">        for (int j = 1; j &lt;= aim; j++) &#123;</div><div class="line">            if (j &gt;= A[i]) &#123;</div><div class="line">                dp[i][j] = dp[i - 1][j] + dp[i][j - A[i]];</div><div class="line">            &#125; else &#123;</div><div class="line">                dp[i][j] = dp[i - 1][j];</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    return dp[A.size() - 1][aim];</div><div class="line">&#125;</div></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;给定一个数组，数组中为不同的数代表不同钱的面值，同时给定一个需要兑换零钱的钱数，任意使用不同面值不同数量的钱来兑换，求一共有多少种方法&lt;br&gt;
+    
+    </summary>
+    
+    
+  </entry>
   
   <entry>
     <title>求连续子序列最大和</title>
