@@ -1,6 +1,5 @@
 <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> iOS中那些精妙的设计模式 · Nineteen</title><meta name="description" content="iOS中那些精妙的设计模式 - 郑祯"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/css/prontera.css"><link rel="search" type="application/opensearchdescription+xml" href="http://www.nineteen.me/atom.xml" title="Nineteen"></head><body><header class="feature-header"><nav class="component-nav"><ul><div class="logo-container"><a href="/"><h2 class="title">Nineteen</h2></a></div><a href="/" target="_self" class="li component-nav-item"><p>INDEX</p></a><a href="/archives" target="_self" class="li component-nav-item"><p>ARCHIVES</p></a><a href="/about" target="_self" class="li component-nav-item"><p>ME</p></a><ul class="shortcut-icons"><a href="http://www.jianshu.com/u/dd2dfc34332d" target="_blank"><img src="/images/jianshu.svg" class="icon"></a><a href="http://weibo.com/5458978084/profile?rightmod=1&amp;wvr=6&amp;mod=personinfo&amp;is_all=1" target="_blank"><img src="/images/weibo.svg" class="icon"></a><a href="https://github.com/NtZheng" target="_blank"><img src="/images/github.svg" class="icon"></a></ul></ul></nav></header><main class="container"><div id="post-container"><div class="post"><article class="post-block"><h1 class="post-title">iOS中那些精妙的设计模式</h1><div class="post-info">Aug 29, 2017</div><div class="post-content"><p>iOS开发中，cocoa touch框架是一个非常稳定和成熟的框架，这样的一个优秀框架，必然少不了设计模式的存在。本文将设计模式的讲解过渡到iOS设计中，体会历史沉淀下来的设计模式的精妙<br><a id="more"></a></p>
-<p>#####1、工厂模式</p>
-<ul>
+<h5 id="1、工厂模式"><a href="#1、工厂模式" class="headerlink" title="1、工厂模式"></a>1、工厂模式</h5><ul>
 <li><strong>结构图：</strong></li>
 </ul>
 <p><img src="http://upload-images.jianshu.io/upload_images/2070409-b41ef6a9a9f3733e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="工厂模式"></p>
@@ -21,8 +20,7 @@
 </ul>
 </li>
 </ul>
-<p>#####2、抽象工厂</p>
-<ul>
+<h5 id="2、抽象工厂"><a href="#2、抽象工厂" class="headerlink" title="2、抽象工厂"></a>2、抽象工厂</h5><ul>
 <li><p><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-e4c41e5d8303bb20.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="抽象工厂"></p>
 </li>
 <li><p><strong>是什么：</strong></p>
@@ -37,8 +35,7 @@
 </li>
 <li><strong>哪里有：</strong>NSNumber调用类初始化方法后，返回的对象是NSCFBoolean和NSBoolean工厂，这两个工厂继承于NSNumber，拥有同样的一些方法，例如intValue和boolValue，在NSNumber的角度看，这就是抽象工厂，同时iOS中把抽象工厂别名为“类簇”</li>
 </ul>
-<p>#####3、装饰者</p>
-<ul>
+<h5 id="3、装饰者"><a href="#3、装饰者" class="headerlink" title="3、装饰者"></a>3、装饰者</h5><ul>
 <li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-740ea4279e4bc2d2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="装饰者"></li>
 <li><strong>是什么：</strong><ul>
 <li>原始的类和装饰者接口共同实现一个接口（如果只有一个装饰者类的话，那么就可以不用接口）</li>
@@ -54,8 +51,7 @@
 </li>
 <li><strong>哪里有：</strong> iOS中的范畴（Category）是一种变相的装饰者模式，他的原理是在编译的时候动态为原来的类添加方法，而不是拥有一个原始类的实例，严格意义上不是装饰者，但是却和装饰者思想很像，在需要添加的功能很少的时候可以用Category</li>
 </ul>
-<p>#####4、责任链模式</p>
-<ul>
+<h5 id="4、责任链模式"><a href="#4、责任链模式" class="headerlink" title="4、责任链模式"></a>4、责任链模式</h5><ul>
 <li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-485a05c6c16dcace.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="责任链"></li>
 <li><strong>是什么：</strong><ul>
 <li>责任链和装饰者很像，因为在实现统一接口的这些类中，都有一个自己接口的对象类型</li>
@@ -70,8 +66,7 @@
 </ul>
 </li>
 </ul>
-<p>#####5、观察者模式</p>
-<ul>
+<h5 id="5、观察者模式"><a href="#5、观察者模式" class="headerlink" title="5、观察者模式"></a>5、观察者模式</h5><ul>
 <li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-11c444e9de29092d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="观察者"></li>
 <li><strong>是什么：</strong><ul>
 <li>为对象之间添加一种依赖的关系，当某一方对象的属性发生变化的时候，另一方的对象<strong>自动</strong>进行相关更新操作</li>
@@ -97,8 +92,7 @@
 </ul>
 </li>
 </ul>
-<p>#####6、命令模式</p>
-<ul>
+<h5 id="6、命令模式"><a href="#6、命令模式" class="headerlink" title="6、命令模式"></a>6、命令模式</h5><ul>
 <li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-36abcdfb49948b83.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="命令"></li>
 <li><strong>是什么：</strong><ul>
 <li>对于直接调用的方法，利用一个对象，将方法封装起来，被称为命令</li>
@@ -124,8 +118,7 @@
 </ul>
 </li>
 </ul>
-<p>#####7、备忘录模式</p>
-<ul>
+<h5 id="7、备忘录模式"><a href="#7、备忘录模式" class="headerlink" title="7、备忘录模式"></a>7、备忘录模式</h5><ul>
 <li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-0bb7cfe490b5ce06.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="备忘录"></li>
 <li><strong>是什么：</strong><ul>
 <li>捕获对象内部的状态，在对象之外封装起来，方便恢复</li>
@@ -146,8 +139,7 @@
 </ul>
 </li>
 </ul>
-<p>#####8、组合模式</p>
-<ul>
+<h5 id="8、组合模式"><a href="#8、组合模式" class="headerlink" title="8、组合模式"></a>8、组合模式</h5><ul>
 <li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-97c683f610c91501.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="组合"></li>
 <li><strong>是什么：</strong><ul>
 <li>将<strong>同一类</strong>对象组合成树状结构，具有部分和整体的层次，但是部分和整体保持一致性</li>
@@ -168,8 +160,7 @@
 </ul>
 </li>
 </ul>
-<p>#####9、单例模式</p>
-<ul>
+<h5 id="9、单例模式"><a href="#9、单例模式" class="headerlink" title="9、单例模式"></a>9、单例模式</h5><ul>
 <li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-36ef811b3a9060ec.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="单利"></li>
 <li><strong>是什么：</strong>相信单例模式是iOS开发者非常熟悉的几个模式之一<ul>
 <li>保证一个类仅有一个实例</li>
@@ -189,8 +180,7 @@
 </ul>
 <hr>
 <p><strong>最后，还需要推荐一篇文章，是我在前年写的，现在看起来，还是蛮不错的一篇文章<a href="http://blog.csdn.net/nineteen_/article/details/47859353" target="_blank" rel="external">iOS单例设计模式详细讲解(单例设计模式不断完善的过程)</a></strong></p>
-<p>#####10、策略模式</p>
-<ul>
+<h5 id="10、策略模式"><a href="#10、策略模式" class="headerlink" title="10、策略模式"></a>10、策略模式</h5><ul>
 <li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-c08f6eb0326c65cc.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="策略"></li>
 <li><strong>是什么：</strong><ul>
 <li>定义一系列的算法，将他们封装为对象，可以相互替换</li>
@@ -206,8 +196,7 @@
 </ul>
 </li>
 </ul>
-<p>#####11、原型模式</p>
-<ul>
+<h5 id="11、原型模式"><a href="#11、原型模式" class="headerlink" title="11、原型模式"></a>11、原型模式</h5><ul>
 <li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-6f71ade94dcc4f52.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="原型"></li>
 <li><strong>是什么：</strong><ul>
 <li>为一个类添加复制操作来创建新的对象</li>
@@ -233,8 +222,7 @@
 </ul>
 <hr>
 <p>具体iOS中的体现，跳转<a href="http://www.jianshu.com/p/c3d9d096debf" target="_blank" rel="external">iOS剖析深浅复制</a></p>
-<p>#####12、生成器模式</p>
-<ul>
+<h5 id="12、生成器模式"><a href="#12、生成器模式" class="headerlink" title="12、生成器模式"></a>12、生成器模式</h5><ul>
 <li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-079967a7adea9429.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="生成器"></li>
 <li><strong>是什么：</strong><ul>
 <li>将创建对象的细节封装到其他类</li>
@@ -248,8 +236,7 @@
 </li>
 <li><strong>和抽象工厂有什么区别：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-9e1885e6547ca12c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="区别"></li>
 </ul>
-<p>#####13、代理模式</p>
-<ul>
+<h5 id="13、代理模式"><a href="#13、代理模式" class="headerlink" title="13、代理模式"></a>13、代理模式</h5><ul>
 <li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-2e172ddc23102caf.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="代理"></li>
 <li><strong>是什么：</strong><ul>
 <li>一个类委托另外一个类去做一件事情</li>
@@ -271,8 +258,7 @@
 </ul>
 </li>
 </ul>
-<p>#####14、适配模式</p>
-<ul>
+<h5 id="14、适配模式"><a href="#14、适配模式" class="headerlink" title="14、适配模式"></a>14、适配模式</h5><ul>
 <li><strong>结构图：</strong><ul>
 <li>类适配模式：<br><img src="http://upload-images.jianshu.io/upload_images/2070409-04b8f88c246af19c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="类适配器"></li>
 <li>对象适配器模式：<br><img src="http://upload-images.jianshu.io/upload_images/2070409-45ba675b2bdc7db4.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="对象适配器"></li>
@@ -297,8 +283,7 @@
 </ul>
 </li>
 </ul>
-<p>#####15、模板方法模式</p>
-<ul>
+<h5 id="15、模板方法模式"><a href="#15、模板方法模式" class="headerlink" title="15、模板方法模式"></a>15、模板方法模式</h5><ul>
 <li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-e5f7ed4f4c7f663f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="模板方法"></li>
 <li><strong>是什么：</strong><ul>
 <li>利用一个抽象类封装基本的方法，并提供一些需要让子类去完善的方法接口</li>
@@ -311,8 +296,7 @@
 </ul>
 </li>
 </ul>
-<p>#####16、迭代器模式</p>
-<ul>
+<h5 id="16、迭代器模式"><a href="#16、迭代器模式" class="headerlink" title="16、迭代器模式"></a>16、迭代器模式</h5><ul>
 <li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-396f7b524d381e8b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="迭代器"></li>
 <li><strong>是什么：</strong><ul>
 <li>迭代器类中拥有需要遍历的集合的对象，在暴露出来的方法中操作集合对象</li>
@@ -327,8 +311,7 @@
 </ul>
 </li>
 </ul>
-<p>#####17、桥接模式</p>
-<ul>
+<h5 id="17、桥接模式"><a href="#17、桥接模式" class="headerlink" title="17、桥接模式"></a>17、桥接模式</h5><ul>
 <li><p><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-02313a445933ab42.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="桥接"></p>
 </li>
 <li><p><strong>是什么：</strong></p>
@@ -343,8 +326,7 @@
 </ul>
 </li>
 </ul>
-<p>#####18、外观模式</p>
-<ul>
+<h5 id="18、外观模式"><a href="#18、外观模式" class="headerlink" title="18、外观模式"></a>18、外观模式</h5><ul>
 <li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-3a13cbd0c244163e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="外观"></li>
 <li><strong>是什么：</strong><ul>
 <li>为一组具有关联的接口提供一个统一的接口，简化调用</li>
@@ -363,4 +345,4 @@ var disqus_url = 'http://www.nineteen.me/2017/08/29/iOS中那些精妙的设计�
     var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
     dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
     (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-})();</script><script id="dsq-count-scr" src="//angrypowman.disqus.com/count.js" async></script></main><footer class="footer-container"><div class="paginator"><a href="/2017/08/28/找零钱/" class="next">下一篇</a></div><div class="copyright"><p>© 2017 <a href="http://www.nineteen.me">郑祯</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/AngryPowman/hexo-theme-prontera" target="_blank">hexo-theme-prontera</a>.</p></div></footer><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"angrypowman",'auto');ga('send','pageview');</script></body></html>
+})();</script><script id="dsq-count-scr" src="//angrypowman.disqus.com/count.js" async></script></main><footer class="footer-container"><div class="paginator"><a href="/2017/08/28/找零钱/" class="next">NEXT</a></div><div class="copyright"><p>© 2017 <a href="http://www.nineteen.me">郑祯</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/AngryPowman/hexo-theme-prontera" target="_blank">hexo-theme-prontera</a>.</p></div></footer><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"angrypowman",'auto');ga('send','pageview');</script></body></html>
