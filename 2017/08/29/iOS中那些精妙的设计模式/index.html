@@ -1,0 +1,366 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> iOS中那些精妙的设计模式 · Nineteen</title><meta name="description" content="iOS中那些精妙的设计模式 - 郑祯"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/css/prontera.css"><link rel="search" type="application/opensearchdescription+xml" href="http://www.nineteen.me/atom.xml" title="Nineteen"></head><body><header class="feature-header"><nav class="component-nav"><ul><div class="logo-container"><a href="/"><h2 class="title">Nineteen</h2></a></div><a href="/" target="_self" class="li component-nav-item"><p>INDEX</p></a><a href="/archives" target="_self" class="li component-nav-item"><p>ARCHIVES</p></a><a href="/about" target="_self" class="li component-nav-item"><p>ME</p></a><ul class="shortcut-icons"><a href="http://www.jianshu.com/u/dd2dfc34332d" target="_blank"><img src="/images/jianshu.svg" class="icon"></a><a href="http://weibo.com/5458978084/profile?rightmod=1&amp;wvr=6&amp;mod=personinfo&amp;is_all=1" target="_blank"><img src="/images/weibo.svg" class="icon"></a><a href="https://github.com/NtZheng" target="_blank"><img src="/images/github.svg" class="icon"></a></ul></ul></nav></header><main class="container"><div id="post-container"><div class="post"><article class="post-block"><h1 class="post-title">iOS中那些精妙的设计模式</h1><div class="post-info">Aug 29, 2017</div><div class="post-content"><p>iOS开发中，cocoa touch框架是一个非常稳定和成熟的框架，这样的一个优秀框架，必然少不了设计模式的存在。本文将设计模式的讲解过渡到iOS设计中，体会历史沉淀下来的设计模式的精妙<br><a id="more"></a></p>
+<p>#####1、工厂模式</p>
+<ul>
+<li><strong>结构图：</strong></li>
+</ul>
+<p><img src="http://upload-images.jianshu.io/upload_images/2070409-b41ef6a9a9f3733e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="工厂模式"></p>
+<ul>
+<li><strong>是什么：</strong><ul>
+<li>提供一个类似工厂加工的方法，创建具体对象，返回抽象类型</li>
+<li>具体生成什么类型在工厂内部进行判断</li>
+<li>最后抽象类型（父类）指向具体对象，作为产品</li>
+</ul>
+</li>
+<li><strong>哪里好：</strong><ul>
+<li>工厂方法具有面向对象的优点，古代没有活字印刷的时候，直接进行雕刻，是面向过程的，复用和维护都非常困难，活字印刷是面向对象的，类似工厂方法，维护和复用都很方便</li>
+<li>将具体产生什么类型隐藏起来，将产生什么类型交给子类决定</li>
+</ul>
+</li>
+<li><strong>哪里有：</strong><ul>
+<li>NSNumber的API中，有类初始化方法，将会产生两种类型，NSCFBoolean和NSCFNumber，这两个类仍然是工厂，而不属于具体对象，继续往下，NSCFBoolean和NSCFNumber的intValue和boolValue方法将会生成具体的对象，NSCFBoolean和NSCFNumber就是所谓的工厂模式的体现</li>
+</ul>
+</li>
+</ul>
+<p>#####2、抽象工厂</p>
+<ul>
+<li><p><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-e4c41e5d8303bb20.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="抽象工厂"></p>
+</li>
+<li><p><strong>是什么：</strong></p>
+<ul>
+<li>可以是一个接口或者一个类，有很多工厂会实现这个接口或者继承这个类</li>
+<li>抽象工厂模式相当于多个工厂实现了统一接口或者继承了同一个类</li>
+</ul>
+</li>
+<li><strong>哪里好：</strong><ul>
+<li>如果只有一种类型的工厂，那么用工厂模式即可，但是有些情况下会存在同类的多个工厂，这时候就扩展为抽象工厂</li>
+</ul>
+</li>
+<li><strong>哪里有：</strong>NSNumber调用类初始化方法后，返回的对象是NSCFBoolean和NSBoolean工厂，这两个工厂继承于NSNumber，拥有同样的一些方法，例如intValue和boolValue，在NSNumber的角度看，这就是抽象工厂，同时iOS中把抽象工厂别名为“类簇”</li>
+</ul>
+<p>#####3、装饰者</p>
+<ul>
+<li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-740ea4279e4bc2d2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="装饰者"></li>
+<li><strong>是什么：</strong><ul>
+<li>原始的类和装饰者接口共同实现一个接口（如果只有一个装饰者类的话，那么就可以不用接口）</li>
+<li>装饰类中有一个接口类型的对象</li>
+<li>装饰类中有新的方法，内嵌在接口的方法中</li>
+<li>装饰类对象和原始类对象都可以作为装饰类对象的接口类型对象</li>
+</ul>
+</li>
+<li><strong>哪里好：</strong>会思考的人可能发现，这种模式其实可以用子类化的形式来进行，那到底优点在哪里呢<ul>
+<li>装饰类不会破坏原始类的性质，同时也添加不同的特性（这点子类化也能做到）</li>
+<li>装饰类中的对象既可以是原始类对象，有也可以是其他装饰类对象，这样就能很方便的出现多种类型组合，而用子类化的方式去做到话，将会产生大量子类</li>
+</ul>
+</li>
+<li><strong>哪里有：</strong> iOS中的范畴（Category）是一种变相的装饰者模式，他的原理是在编译的时候动态为原来的类添加方法，而不是拥有一个原始类的实例，严格意义上不是装饰者，但是却和装饰者思想很像，在需要添加的功能很少的时候可以用Category</li>
+</ul>
+<p>#####4、责任链模式</p>
+<ul>
+<li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-485a05c6c16dcace.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="责任链"></li>
+<li><strong>是什么：</strong><ul>
+<li>责任链和装饰者很像，因为在实现统一接口的这些类中，都有一个自己接口的对象类型</li>
+<li>但是又有所不同，装饰者是在统一的方法中添加新的功能，责任链则是都具有自己独一无二的功能</li>
+<li>通过对象与对象之间的链接，构成一条完整的逻辑线</li>
+<li>如同工厂里面的产品生产线，每个部门都有自己擅长的部分，只做自己的部分，其他部分交给其他部门来完成</li>
+</ul>
+</li>
+<li><strong>哪里好：</strong><ul>
+<li>将提交申请者和申请处理者之间的耦合解除，提交申请者不需要关心是谁在处理申请</li>
+<li>处理者只需要关心自己擅长的部分，如果不会，则交给下一位去做</li>
+</ul>
+</li>
+</ul>
+<p>#####5、观察者模式</p>
+<ul>
+<li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-11c444e9de29092d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="观察者"></li>
+<li><strong>是什么：</strong><ul>
+<li>为对象之间添加一种依赖的关系，当某一方对象的属性发生变化的时候，另一方的对象<strong>自动</strong>进行相关更新操作</li>
+</ul>
+</li>
+<li><strong>哪里好：</strong><ul>
+<li>解除了相互依赖的对象之间过多的耦合，双方对对方的了解都很少</li>
+<li>当一方对象属性变化时，另一方能自动做出相应的变化（这一点可以说是观察者模式的核心）</li>
+</ul>
+</li>
+<li><strong>哪里有：</strong>iOS中有两种关于观察者模式的实现，一种是通知机制，一种是KVO机制，通知机制不是最原始的观察者模式，但是却在核心的思想上面进行适合iOS开发的修改，KVO能够很好诠释观察者模式<ul>
+<li>通知机制<ul>
+<li>使用了一个通知中心的单例来作为平台</li>
+<li>被观察者为一个特定的类对象（NSNotification），该类的作用就是作为一种通知</li>
+</ul>
+</li>
+<li>KVO<ul>
+<li>观察者实现一个方法（update方法），如果是是一个对象要使用，则封装在对象的.m文件中，如果是视图控制器使用，贼在试图控制器中实现就好</li>
+<li>被观察者需要添加观察者，一般来说我们会添加self，然后在当前控制器上实现方法，<strong>可能很多人都会使用这个，但是却不了解这个原理，这一步的操作实际上是将该控制器对象作为观察者添加了，实现的这个方法，其实就是观察者的update方法</strong></li>
+<li>关于怎么在属性变化的时候通知观察者调用update方法，这个逻辑被封装到了KVO内部，自己也能试着模拟</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>#####6、命令模式</p>
+<ul>
+<li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-36abcdfb49948b83.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="命令"></li>
+<li><strong>是什么：</strong><ul>
+<li>对于直接调用的方法，利用一个对象，将方法封装起来，被称为命令</li>
+<li>并通过一个类似于“服务员”的角色和调用命令的对象进行交互</li>
+</ul>
+</li>
+<li><strong>哪里好：</strong>命令模式从本质上来说，其实就是将直接调用的方法封装起来，变成一个对象，好处有这些<ul>
+<li>封装起来，相当于是一种延时操作，所以可以利用这种模式做撤销</li>
+<li>同时可以为方法设置一个队列，具有执行顺序的队列，在什么时候执行也可以加以限制</li>
+</ul>
+</li>
+<li><strong>哪里有：</strong><ul>
+<li>NSInvocation<ul>
+<li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-3e816ba67912c894.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="NSInvocation"></li>
+<li>NSInvocation的角色就是命令模式中的封装方法的命令类</li>
+</ul>
+</li>
+<li>NSUndoManager<ul>
+<li>NSUndoManager提供了撤销机制</li>
+<li>NSUndoManger也是利用了NSInvocation类对象作为命令角色</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>#####7、备忘录模式</p>
+<ul>
+<li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-0bb7cfe490b5ce06.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="备忘录"></li>
+<li><strong>是什么：</strong><ul>
+<li>捕获对象内部的状态，在对象之外封装起来，方便恢复</li>
+</ul>
+</li>
+<li><strong>哪里好：</strong><ul>
+<li>备忘录模式在很多场景都会使用，例如存档，游戏进度存储和读取等等</li>
+</ul>
+</li>
+<li><strong>哪里有：</strong><ul>
+<li>归档<ul>
+<li>备忘录对象即为归档对象</li>
+<li>被归档的对象为操作对象</li>
+<li>文件系统则为备忘录管理者</li>
+</ul>
+</li>
+<li>属性列表序列化</li>
+</ul>
+</li>
+</ul>
+<p>#####8、组合模式</p>
+<ul>
+<li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-97c683f610c91501.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="组合"></li>
+<li><strong>是什么：</strong><ul>
+<li>将<strong>同一类</strong>对象组合成树状结构，具有部分和整体的层次，但是部分和整体保持一致性</li>
+</ul>
+</li>
+<li><strong>哪里好：</strong><ul>
+<li>能够保证整体和单个的一致性，对外界的接口是一致的</li>
+<li>对整体的处理能够遍历到所有局部个体</li>
+</ul>
+</li>
+<li><strong>哪里有：</strong><ul>
+<li>在UIKit框架中，UIView的设计能够非常明确地体现这种设计模式      <ul>
+<li>UIView是可以添加UIView类以及它子类的对象的</li>
+<li>UIView对象的渲染以及其他操作会遍历到子类去依次进行</li>
+</ul>
+</li>
+<li>图示：<br><img src="http://upload-images.jianshu.io/upload_images/2070409-6fccd9996a89bf52.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="UIView如何体现组合模式"></li>
+</ul>
+</li>
+</ul>
+<p>#####9、单例模式</p>
+<ul>
+<li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-36ef811b3a9060ec.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="单利"></li>
+<li><strong>是什么：</strong>相信单例模式是iOS开发者非常熟悉的几个模式之一<ul>
+<li>保证一个类仅有一个实例</li>
+<li>同时提供一个访问该唯一实例的访问接口</li>
+</ul>
+</li>
+<li><strong>哪里好：</strong><ul>
+<li>当一个类只需要产生一个实例的时候会用到单例模式</li>
+</ul>
+</li>
+<li><strong>哪里有：</strong>相信iOS开发者对一些存在于开发中的单例类已经非常熟悉<ul>
+<li>UIApplication：控制iOS应用程序的类</li>
+<li>UIAccelerometer：加速器感应的类</li>
+<li>NSFileManager：文件管理的类</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>最后，还需要推荐一篇文章，是我在前年写的，现在看起来，还是蛮不错的一篇文章<a href="http://blog.csdn.net/nineteen_/article/details/47859353" target="_blank" rel="external">iOS单例设计模式详细讲解(单例设计模式不断完善的过程)</a></strong></p>
+<p>#####10、策略模式</p>
+<ul>
+<li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-c08f6eb0326c65cc.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="策略"></li>
+<li><strong>是什么：</strong><ul>
+<li>定义一系列的算法，将他们封装为对象，可以相互替换</li>
+</ul>
+</li>
+<li><strong>哪里好：</strong><ul>
+<li>策略模式的作用就是将大量的if else结构给除去，使用对象来执行操作</li>
+<li>避免将算法的具体细节暴露给外部</li>
+</ul>
+</li>
+<li><strong>哪里有：</strong><ul>
+<li>MVC模式中涵盖了很多其他的模式，其中策略模式就是其中之一，策略模式在MVC模式中的体现为：控制器作为视图的策略类，视图在没有控制器的情况下，显示应该是一样的，但是不同的控制器将会给视图赋予不同的数据已经输出模式等</li>
+</ul>
+</li>
+</ul>
+<p>#####11、原型模式</p>
+<ul>
+<li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-6f71ade94dcc4f52.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="原型"></li>
+<li><strong>是什么：</strong><ul>
+<li>为一个类添加复制操作来创建新的对象</li>
+</ul>
+</li>
+<li><strong>哪里好：</strong><ul>
+<li>如果一个对象是组合对象（见组合模式），那么使用原型模式来为对象创建克隆方法较为方便</li>
+</ul>
+</li>
+<li><strong>哪里有：</strong>原型模式在实际开发中使用的并不是很多，但是原型模式中克隆方法就有所讲究了，这里对克隆的方法简要说明一下：<ul>
+<li>浅复制：<ul>
+<li>只复制指向实际对象的指针，两个指针指向的仍然是一个资源</li>
+<li><img src="http://upload-images.jianshu.io/upload_images/2070409-a9b98a52e818dafd.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="浅复制"></li>
+</ul>
+</li>
+<li>深复制：<ul>
+<li>复制指向对象的指针以及指针指向的资源</li>
+<li><img src="http://upload-images.jianshu.io/upload_images/2070409-43a2214ea3b8b7a6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="深复制"></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>具体iOS中的体现，跳转<a href="http://www.jianshu.com/p/c3d9d096debf" target="_blank" rel="external">iOS剖析深浅复制</a></p>
+<p>#####12、生成器模式</p>
+<ul>
+<li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-079967a7adea9429.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="生成器"></li>
+<li><strong>是什么：</strong><ul>
+<li>将创建对象的细节封装到其他类</li>
+<li>将多样化的创建过程封装起来，用户只需要制定创建的类型即可</li>
+</ul>
+</li>
+<li><strong>哪里好：</strong><ul>
+<li>客户类中的创建代码不再需要大量if else进行判断创建，直接制定类型即可创建</li>
+<li>将创建过程封装起来，变得非常稳定不易出错</li>
+</ul>
+</li>
+<li><strong>和抽象工厂有什么区别：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-9e1885e6547ca12c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="区别"></li>
+</ul>
+<p>#####13、代理模式</p>
+<ul>
+<li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-2e172ddc23102caf.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="代理"></li>
+<li><strong>是什么：</strong><ul>
+<li>一个类委托另外一个类去做一件事情</li>
+</ul>
+</li>
+<li><strong>哪里有：</strong><ul>
+<li>iOS中的协议、代理和委托对象构成了代理模式：<ul>
+<li>协议：是约束代理对象需要进行的操作</li>
+<li>代理：执行被指派的操作</li>
+<li>委托：指派任务的角色</li>
+<li>用UITableView来细化这种模式：<ul>
+<li>UITableView：作为委托者，内部拥有一个代理对象，在创建视图的方法中（推测内部实现）会使用代理对象执行协议中的方法</li>
+<li>UITableViewDelegate&amp;UITableViewDataSource：作为协议，约束了代理对象需要实现的方法</li>
+<li>UIViewController（或者是为了系统瘦身自定定义的一个代理类）：实现了协议中的方法</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>#####14、适配模式</p>
+<ul>
+<li><strong>结构图：</strong><ul>
+<li>类适配模式：<br><img src="http://upload-images.jianshu.io/upload_images/2070409-04b8f88c246af19c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="类适配器"></li>
+<li>对象适配器模式：<br><img src="http://upload-images.jianshu.io/upload_images/2070409-45ba675b2bdc7db4.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="对象适配器"></li>
+</ul>
+</li>
+<li><strong>是什么：</strong><ul>
+<li>一个类想要调用另外一个类的方法，但是却不兼容</li>
+<li>利用适配器类包装不兼容的方法，变为兼容方法供其他类使用</li>
+</ul>
+</li>
+<li><strong>哪里好：</strong><ul>
+<li>在方法调用不兼容的时候使用</li>
+</ul>
+</li>
+<li><strong>哪里有：</strong><ul>
+<li>iOS开发中如果导入了某个SDK，如果SDK中有一些方法在你的APP中并不兼容，那么这个时候适配器模式就能大显神威<ul>
+<li>利用协议为适配器类约定方法</li>
+<li>将SDK中方法封装到协议方法中</li>
+<li>并添加上自己APP中需要进行的处理</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>#####15、模板方法模式</p>
+<ul>
+<li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-e5f7ed4f4c7f663f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="模板方法"></li>
+<li><strong>是什么：</strong><ul>
+<li>利用一个抽象类封装基本的方法，并提供一些需要让子类去完善的方法接口</li>
+<li>在基本方法中调用这些需要让子类完善的方法，从而达到不同的子类可以根据不同的情况实现不同的代码</li>
+</ul>
+</li>
+<li><strong>哪里有：</strong><ul>
+<li>UIView的drawRect方法：该方法是用于描述UIView长什么样子的，这个方法留给子类去实现，从而实现不同绘制</li>
+<li>UIViewController的设备不同方向的方法</li>
+</ul>
+</li>
+</ul>
+<p>#####16、迭代器模式</p>
+<ul>
+<li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-396f7b524d381e8b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="迭代器"></li>
+<li><strong>是什么：</strong><ul>
+<li>迭代器类中拥有需要遍历的集合的对象，在暴露出来的方法中操作集合对象</li>
+</ul>
+</li>
+<li><strong>哪里好：</strong><ul>
+<li>如果不想暴露集合内部的信息，那么可以使用迭代器模式，通过迭代器暴露的方法来对集合进行访问和操作</li>
+</ul>
+</li>
+<li><strong>哪里有：</strong><ul>
+<li>NSEnumerator是iOS中的迭代器类，可以对常用的集合对象进行访问和操作</li>
+</ul>
+</li>
+</ul>
+<p>#####17、桥接模式</p>
+<ul>
+<li><p><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-02313a445933ab42.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="桥接"></p>
+</li>
+<li><p><strong>是什么：</strong></p>
+<ul>
+<li>很多书上说：抽象部分和实现部分分离，但是我觉得这种解释很不容易理解</li>
+<li>这里给出通俗的解释：相互关联的类中，每个类都具有类的抽象，同时也有具体类的实现，这种情况下，与其将两个类体系利用继承融合起来，还不如使用聚合/组合将两个类体现关联起来。</li>
+</ul>
+</li>
+<li><strong>哪里好：</strong><ul>
+<li>两个类体系对外界暴露的接口都是抽象的，所以修改一个类体系的类的具体实现是不会对另一个类体系造成影响的</li>
+<li>可以有很多种组合方法，到底是A中拥有B，还是B中拥有A，都是可以实现的</li>
+</ul>
+</li>
+</ul>
+<p>#####18、外观模式</p>
+<ul>
+<li><strong>结构图：</strong><br><img src="http://upload-images.jianshu.io/upload_images/2070409-3a13cbd0c244163e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="外观"></li>
+<li><strong>是什么：</strong><ul>
+<li>为一组具有关联的接口提供一个统一的接口，简化调用</li>
+</ul>
+</li>
+<li><strong>哪里好：</strong><ul>
+<li>避免了必须知道一系列接口的调用细节才能完成功能的尴尬情况</li>
+</ul>
+</li>
+</ul>
+</div></article></div><div id="disqus_thread"></div></div><script>var disqus_shortname = 'angrypowman';
+var disqus_identifier = '2017/08/29/iOS中那些精妙的设计模式/';
+var disqus_title = 'iOS中那些精妙的设计模式';
+var disqus_url = 'http://www.nineteen.me/2017/08/29/iOS中那些精妙的设计模式/';
+(function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();</script><script id="dsq-count-scr" src="//angrypowman.disqus.com/count.js" async></script></main><footer class="footer-container"><div class="paginator"><a href="/2017/08/28/找零钱/" class="next">下一篇</a></div><div class="copyright"><p>© 2017 <a href="http://www.nineteen.me">郑祯</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/AngryPowman/hexo-theme-prontera" target="_blank">hexo-theme-prontera</a>.</p></div></footer><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"angrypowman",'auto');ga('send','pageview');</script></body></html>
