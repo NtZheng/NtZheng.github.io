@@ -1,0 +1,128 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> 抽象工厂和你们口中的“类簇” · Nineteen</title><meta name="description" content="抽象工厂和你们口中的“类簇” - 郑祯"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/css/prontera.css"><link rel="search" type="application/opensearchdescription+xml" href="http://www.nineteen.me/atom.xml" title="Nineteen"></head><body><header class="feature-header"><nav class="component-nav"><ul><div class="logo-container"><a href="/"><h2 class="title">Nineteen</h2></a></div><a href="/" target="_self" class="li component-nav-item"><p>INDEX</p></a><a href="/archives" target="_self" class="li component-nav-item"><p>ARCHIVES</p></a><a href="/about" target="_self" class="li component-nav-item"><p>ME</p></a><ul class="shortcut-icons"><a href="http://www.jianshu.com/u/dd2dfc34332d" target="_blank"><img src="/images/jianshu.svg" class="icon"></a><a href="http://weibo.com/5458978084/profile?rightmod=1&amp;wvr=6&amp;mod=personinfo&amp;is_all=1" target="_blank"><img src="/images/weibo.svg" class="icon"></a><a href="https://github.com/NtZheng" target="_blank"><img src="/images/github.svg" class="icon"></a></ul></ul></nav></header><main class="container"><div id="post-container"><div class="post"><article class="post-block"><h1 class="post-title">抽象工厂和你们口中的“类簇”</h1><div class="post-info">Jan 14, 2018</div><div class="post-content"><p>类簇可以说是<code>Objective-C</code>语言中比较重要的设计，<code>Apple</code>在官方文档中用一篇文章来介绍这个概念，尽管文章点到为止，并没有深入到内部机制，但是也用了详细的例子来说明类簇的设计是多么优秀。<code>Apple</code>在文档中称类簇是基于抽象工厂模式来设计的，如果你对抽象工厂的定义不清晰，可能会问，<strong>抽象工厂是什么？</strong>如果你对抽象工厂的定义清晰，有可能会问，<strong>类簇的设计真的是基于抽象工厂模式吗？</strong>本文站在设计模式的源头，对类簇进行挖掘解读。<br><a id="more"></a></p>
+<p>先别急，我的文章需要延续一贯的个人风格，有足够的准备，我们先来理解设计模式中的工厂模式</p>
+<h4 id="工厂模式"><a href="#工厂模式" class="headerlink" title="工厂模式"></a>工厂模式</h4><p>工厂模式一共有三种，简单工厂模式，工厂方法模式，抽象工厂模式。接下来我们依次通过图文并茂的描述进行理解</p>
+<h5 id="简单工厂模式"><a href="#简单工厂模式" class="headerlink" title="简单工厂模式"></a>简单工厂模式</h5><p>先来看看简单工厂的<code>UML</code>图（回归经典，用的<code>Java</code>语言）<br><img src="http://upload-images.jianshu.io/upload_images/2070409-753219f7c0f6320a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""><br>我们将简单工厂模式分为几个部分来解读：</p>
+<ul>
+<li><strong>产品：</strong><ul>
+<li>定义了一个抽象的产品类</li>
+<li>有两个具体产品类继承了该抽象类</li>
+</ul>
+</li>
+<li><p><strong>工厂：</strong></p>
+<ul>
+<li><code>creatProduct(String):Product</code>方法：参数为<code>String</code>类型，返回值为<code>Product</code>类型</li>
+<li>伪代码实现：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">if(type == &quot;A&quot;) &#123;</div><div class="line">    return new ProductA();</div><div class="line">&#125; else &#123;</div><div class="line">    return new ProductB();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p><strong>使用：</strong></p>
+<ul>
+<li>伪代码示例：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Product product = factory.creatProduct(&quot;A&quot;);</div><div class="line">product.operation();</div></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+<p>可以发现，主要的逻辑代码写在了工厂的方法中，那么如果产品种类增多，我们就需要去修改工厂的方法。回忆一下设计模式六大原则之一的<strong>开放-封闭原则</strong>，开放指的是面向扩展开放，封闭指的是面向修改封闭。再回到简单工厂模式来看，是不是违背了原则呢。所以在实际应用中，正如它的名字，它仅仅在一些简单场景使用。</p>
+<h5 id="工厂方法模式"><a href="#工厂方法模式" class="headerlink" title="工厂方法模式"></a>工厂方法模式</h5><p>同样地，我们先来看看工厂方法模式的<code>UML</code>图<br><img src="http://upload-images.jianshu.io/upload_images/2070409-9e62042033768d07.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""><br>同样地，将其分为几个部分来解读：</p>
+<ul>
+<li><strong>产品：</strong><ul>
+<li>定义了一个抽象的产品类</li>
+<li>有两个具体产品类继承了该抽象类</li>
+</ul>
+</li>
+<li><p><strong>工厂：</strong></p>
+<ul>
+<li>定义了一个抽象的工厂类</li>
+<li>有两个具体工厂类继承了该抽象类</li>
+<li><p><code>FactoryA</code>类中的<code>+ creatProduct():Product</code>方法伪代码：</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">return new ProductA();</div></pre></td></tr></table></figure>
+</li>
+<li><p><code>FactoryB</code>类中的<code>creatProduct():Product</code>方法伪代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">return new ProductB();</div></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p><strong>使用：</strong></p>
+<ul>
+<li>伪代码演示：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">// 创建产品A</div><div class="line">Factory factoryA = new FactoryA();</div><div class="line">Product productA = factoryA.creatProduct();</div><div class="line">// 创建产品B</div><div class="line">Factory factoryB = new FactoryB();</div><div class="line">Product productB = factoryB.creatProduct();</div></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+<p>看完了<strong>简单工厂模式</strong>和<strong>工厂方法模式</strong>，通过对比可以发现，工厂方法模式在简单工厂模式的基础之上，践行了<strong>开放-封闭原则</strong>，创建产品不再通过传入参数判断应该生成哪个具体产品，而是将工厂创建产品的任务放在了子类去做。当增加了新的产品时，我们只需要创建新的子类，实现方法，不需要对抽象类进行修改。</p>
+<h5 id="抽象工厂模式"><a href="#抽象工厂模式" class="headerlink" title="抽象工厂模式"></a>抽象工厂模式</h5><p>老样子，来看看抽象工厂的<code>UML</code>图<br><img src="http://upload-images.jianshu.io/upload_images/2070409-1875355039d68899.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""><br>分成三部分来解读抽象工厂模式：</p>
+<ul>
+<li><strong>产品：</strong><ul>
+<li>有两个抽象的产品类</li>
+<li>有两个具体产品类分别继承了各自的抽象类</li>
+</ul>
+</li>
+<li><p><strong>工厂：</strong></p>
+<ul>
+<li>定义了一个抽象的工厂类</li>
+<li>有两个具体工厂类继承了该抽象类</li>
+<li><p>创建产品的方法，以<code>Factory1</code>类示例：</p>
+<ul>
+<li><p><code>creatProductA():ProductA</code>方法的伪代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">return new ProductA1();</div></pre></td></tr></table></figure>
+</li>
+<li><p><code>creatProductB():ProductB</code>方法的伪代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">return new ProductB1();</div></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>使用：</strong></p>
+<ul>
+<li>伪代码演示：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">// 型号为1的产品</div><div class="line">Factory factory1 = new Factory1();</div><div class="line">ProductA productA1 = factory1.creatProductA();</div><div class="line">ProductB productB1 = factory1.creatProductB();</div><div class="line">// 型号为2的产品</div><div class="line">Factory factory2 = new Factory2();</div><div class="line">ProductA productA2 = factory2.creatProductA();</div><div class="line">ProductB productB2 = factory2.creatProductB();</div></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+<p>可以发现，<strong>抽象工厂模式</strong>其实就是在<strong>工厂方法模式</strong>的基础上增加了产品的种类，产品的抽象类从一个变成了多个，那么这样一来，产品就构成了一个体系。这个体系有两个关键词，<strong>产品簇</strong>和<strong>产品等级结构</strong>，为了理解这两个关键字，我们先来看个实际的例子：<br><img src="http://upload-images.jianshu.io/upload_images/2070409-505b0d9819364ae5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<ul>
+<li><strong>产品等级结构：</strong>等级结构就是继承结构，如上图中手机和电脑，有一个抽象类，然后具体的产品继承这个抽象类</li>
+<li><strong>产品簇：</strong>上图中iphoneX和MacBook Pro都是产于同一个公司，苹果公司。而小米MIX和小米笔记本Pro也是产于同一家公司。即产品簇的概念是，产于同一家工厂，位于不同产品等级结构中的一组产品。</li>
+</ul>
+<p>有了以上的准备知识之后，我们来看看<code>Objective-C</code>中的类簇设计</p>
+<h4 id="类簇"><a href="#类簇" class="headerlink" title="类簇"></a>类簇</h4><p> 在<a href="https://developer.apple.com/library/content/documentation/General/Conceptual/CocoaEncyclopedia/ClassClusters/ClassClusters.html" target="_blank" rel="external">官方文档</a>中，苹果仅仅告诉我们类簇是基于抽象工厂模式来设计的</p>
+<blockquote>
+<p>Class clusters are based on the Abstract Factory design pattern.</p>
+</blockquote>
+<p>文档中通过对比是否使用类簇来设计接口，告诉了我们类簇的设计师优秀的。它能产生简单的概念，同时能够使接口简化。那么类簇是什么呢？</p>
+<h5 id="类簇的定义"><a href="#类簇的定义" class="headerlink" title="类簇的定义"></a>类簇的定义</h5><blockquote>
+<p>Class clusters group a number of private concrete subclasses under a public abstract superclass. The grouping of classes in this way simplifies the publicly visible architecture of an object-oriented framework without reducing its functional richness.</p>
+</blockquote>
+<p>苹果告诉我们，类簇汇集了若干私有具体子类隐藏在共有的抽象父类之下，通过这种方式，简化了面向对象框架中公共可见的架构，同时并没有减少框架功能的丰富性。</p>
+<h5 id="举个例子"><a href="#举个例子" class="headerlink" title="举个例子"></a>举个例子</h5><p>来看下<code>NSNumber</code>，它是<code>Objective-C</code>中关于数据类型的封装类<br><img src="http://upload-images.jianshu.io/upload_images/2070409-02ca5cc5053f5534.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<blockquote>
+<p>Users of this hierarchy see only one public class, <code>Number</code>, so how is it possible to allocate instances of the proper subclass? The answer is in the way the abstract superclass handles instantiation.</p>
+</blockquote>
+<p>对于这个层级的使用者，仅仅能看到一个共有类，那就是<code>NSNumber</code>，所以要分配内存创建合适的子类对象，又怎么可能呢？答案就是这个抽象父类对如何分配进行了处理。</p>
+<p>看到这里，我心里油然而生一个大大的问号，这都哪跟哪，说好的抽象工厂呢，连个工厂都没有，产品自己生产了自己。如果大家也有这个问题，那么带着这个问题，继续往下看</p>
+<h5 id="类簇的使用"><a href="#类簇的使用" class="headerlink" title="类簇的使用"></a>类簇的使用</h5><p>官方文档中举例：<br><figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">NSNumber</span> *aChar = [<span class="built_in">NSNumber</span> numberWithChar:’a’];</div><div class="line"><span class="built_in">NSNumber</span> *anInt = [<span class="built_in">NSNumber</span> numberWithInt:<span class="number">1</span>];</div><div class="line"><span class="built_in">NSNumber</span> *aFloat = [<span class="built_in">NSNumber</span> numberWithFloat:<span class="number">1.0</span>];</div><div class="line"><span class="built_in">NSNumber</span> *aDouble = [<span class="built_in">NSNumber</span> numberWithDouble:<span class="number">1.0</span>];</div></pre></td></tr></table></figure></p>
+<blockquote>
+<p>The abstract superclass in a class cluster must declare methods for creating instances of its private subclasses. It’s the superclass’s responsibility to dispense an object of the proper subclass based on the creation method that you invoke—you don’t, and can’t, choose the class of the instance.</p>
+</blockquote>
+<p>抽象父类务必需要定义创建私有子类的方法，这是抽象父类的职责。抽象父类需要基于大家调用的创建方法去分配内存到合适的子类，同时使用者不需要也不能选择对象的类型，统一使用<code>NSNumber</code>来管理。</p>
+<p>到这里，官方介绍介绍，疑惑并没有解决，大家可以能有这种感觉，除了没有工厂之外，看起来就和<strong>简单工厂模式</strong>没两样。</p>
+<h5 id="我们应该如何理解？"><a href="#我们应该如何理解？" class="headerlink" title="我们应该如何理解？"></a>我们应该如何理解？</h5><p>首先，我们尝试着先找到工厂在哪里，官方文档中举例是通过类方法的，可以隐藏了一些细节，那么我们换做对象方法来试试<br><figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">id</span> number_alloc = [<span class="built_in">NSNumber</span> alloc];</div><div class="line"><span class="keyword">id</span> number_init_int = [number_alloc initWithInt:<span class="number">3</span>];</div><div class="line"><span class="keyword">id</span> number_init_bool = [number_alloc initWithBool:<span class="literal">YES</span>];</div><div class="line"><span class="keyword">id</span> number_init_char = [number_alloc initWithChar:<span class="string">'c'</span>];</div><div class="line"><span class="keyword">id</span> number_init_float = [number_alloc initWithFloat:<span class="number">1.1</span>];</div></pre></td></tr></table></figure></p>
+<p>再来看看类型<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">(lldb) p number_alloc</div><div class="line">(NSPlaceholderNumber *) $0 = 0x0000600000017e30</div><div class="line">(lldb) p number_init_int</div><div class="line">(__NSCFNumber *) $1 = 0xb000000000000032 (int)3</div><div class="line">(lldb) p number_init_bool</div><div class="line">(__NSCFBoolean *) $2 = 0x00000001038815e0</div><div class="line">(lldb) p number_init_char</div><div class="line">(__NSCFNumber *) $3 = 0xb000000000000630 (char)99</div><div class="line">(lldb) p number_init_float</div><div class="line">(__NSCFNumber *) $4 = 0x00006080000323e0 (float)1.100000</div></pre></td></tr></table></figure></p>
+<p>看来是有些收获的，在<code>alloc</code>的后，得到的对象类型是<code>NSPlaceholderNumber</code>（回想之前解读官方文档时，苹果多次提到了allocate（分配））接着进行了<code>init</code>，得到的结果主要有两种类型，<code>__NSCFNumber</code>和<code>__NSCFBoolean</code>。那么初步的<code>UML</code>架构就可以建立了：<br><img src="http://upload-images.jianshu.io/upload_images/2070409-06ef59f575e9926b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<h5 id="是简单工厂吗？"><a href="#是简单工厂吗？" class="headerlink" title="是简单工厂吗？"></a>是简单工厂吗？</h5><p>从这个<code>UML</code>图来看，貌似和<strong>简单工厂模式</strong>差不多呢，但是细心观察，这里并没有像<strong>简单工厂模式</strong>一样违背了<strong>开放-封闭原则</strong>。在工厂类<code>NSPlaceholderNumber</code>中，提供了创建不种类产品的方法。这点和抽象工厂很像。那和抽象工厂不一样的地方呢？</p>
+<h5 id="和抽象工厂的对比"><a href="#和抽象工厂的对比" class="headerlink" title="和抽象工厂的对比"></a>和抽象工厂的对比</h5><p>仔细地想下，<code>NSNumber</code>的<code>UML</code>架构就仿佛是将<strong>抽象工厂模式</strong>中以工厂为单位分割出来的小单位。回到小米和苹果的那个例子，就好像其中的一个<strong>产品簇</strong>，例如只有苹果公司以及它的iphoneX和MacBook Pro。嘿嘿，看到这里，<code>NSNumber</code>的抽象工厂设计的神秘面纱悄悄地揭开了。</p>
+<h5 id="为何这么设计？"><a href="#为何这么设计？" class="headerlink" title="为何这么设计？"></a>为何这么设计？</h5><p>刚刚提到了，<code>NSNumber</code>目前只是产品簇中的一条产品线。那么如果以后产生了其他类型的产品线，苹果不需要修改之前的代码，只需要添加另外的工厂和另外的产品线，将<strong>开放-封闭原则</strong>发挥地玲离尽致。</p>
+<h4 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h4><ul>
+<li>官方文档：<a href="https://developer.apple.com/library/content/documentation/General/Conceptual/CocoaEncyclopedia/ClassClusters/ClassClusters.html" target="_blank" rel="external">Class Cluster</a></li>
+<li>《head first design patterns》</li>
+</ul>
+</div></article></div><div id="disqus_thread"></div></div><script>var disqus_shortname = 'angrypowman';
+var disqus_identifier = '2018/01/14/抽象工厂和你们口中的“类簇”/';
+var disqus_title = '抽象工厂和你们口中的“类簇”';
+var disqus_url = 'http://www.nineteen.me/2018/01/14/抽象工厂和你们口中的“类簇”/';
+(function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();</script><script id="dsq-count-scr" src="//angrypowman.disqus.com/count.js" async></script></main><footer class="footer-container"><div class="paginator"><a href="/2018/01/14/苹果如何在多尺寸屏中适配/" class="prev">PREV</a><a href="/2017/09/20/iOS单例模式详细讲解（单例模式不断完善的过程）/" class="next">NEXT</a></div><div class="copyright"><p>© 2017 - 2018 <a href="http://www.nineteen.me">郑祯</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/AngryPowman/hexo-theme-prontera" target="_blank">hexo-theme-prontera</a>.</p></div></footer><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"angrypowman",'auto');ga('send','pageview');</script></body></html>
