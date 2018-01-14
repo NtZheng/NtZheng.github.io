@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.nineteen.me/"/>
-  <updated>2018-01-14T03:05:53.000Z</updated>
+  <updated>2018-01-14T03:15:13.000Z</updated>
   <id>http://www.nineteen.me/</id>
   
   <author>
@@ -14,6 +14,114 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>为你的视图建立一个基类！</title>
+    <link href="http://www.nineteen.me/2018/01/14/%E4%B8%BA%E4%BD%A0%E7%9A%84%E8%A7%86%E5%9B%BE%E5%BB%BA%E7%AB%8B%E4%B8%80%E4%B8%AA%E5%9F%BA%E7%B1%BB%EF%BC%81/"/>
+    <id>http://www.nineteen.me/2018/01/14/为你的视图建立一个基类！/</id>
+    <published>2018-01-14T03:14:43.000Z</published>
+    <updated>2018-01-14T03:15:13.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>题目中引人注目的感叹号，在这句话的作用不是惊讶，而表达的是，应该这样做。为所有视图建立基类，利用继承和多态的特性，更好地约束视图类的代码和风格。<br><a id="more"></a></p>
+<h4 id="从代码入手"><a href="#从代码入手" class="headerlink" title="从代码入手"></a>从代码入手</h4><h6 id="h文件的代码"><a href="#h文件的代码" class="headerlink" title=".h文件的代码"></a>.h文件的代码</h6><figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#import <span class="meta-string">&lt;UIKit/UIKit.h&gt;</span></span></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">@protocol</span> <span class="title">NTBasicViewProtocol</span> &lt;<span class="title">NSObject</span>&gt;</span></div><div class="line"></div><div class="line">- (<span class="keyword">void</span>)setUpSubViews;</div><div class="line">- (<span class="keyword">void</span>)setUpConstraints;</div><div class="line"></div><div class="line"><span class="keyword">@optional</span></div><div class="line"></div><div class="line">- (<span class="keyword">void</span>)bindViewModel;</div><div class="line"></div><div class="line"><span class="keyword">@end</span></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">NTBasicView</span> : <span class="title">UIView</span> &lt;<span class="title">NTBasicViewProtocol</span>&gt;</span></div><div class="line"></div><div class="line"><span class="keyword">@end</span></div></pre></td></tr></table></figure>
+<p>为了更清晰地看到到代码，这里没有在代码中添加注释。那么现在就来看下代码.h文件中的代码组成，声明了<code>NTBasicViewProtocol</code>这个协议，协议中有两个必须实现的方法</p>
+<ul>
+<li><code>setUpSubViews</code>：设置子控件</li>
+<li><code>setUpConstraints</code>：设置子控件的约束（位置）</li>
+</ul>
+<p>以及一个可选实现的方法</p>
+<ul>
+<li><code>bindViewModel</code>：事件绑定方法</li>
+</ul>
+<p>了解了头文件声明了哪些方法之后，我们需要知道基类的实现</p>
+<h6 id="m文件的代码"><a href="#m文件的代码" class="headerlink" title=".m文件的代码"></a>.m文件的代码</h6><figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#import <span class="meta-string">"NTBasicView.h"</span></span></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">NTBasicView</span></span></div><div class="line"></div><div class="line">- (<span class="keyword">instancetype</span>)initWithFrame:(<span class="built_in">CGRect</span>)frame</div><div class="line">&#123;</div><div class="line">    <span class="keyword">self</span> = [<span class="keyword">super</span> initWithFrame:frame];</div><div class="line">    <span class="keyword">if</span> (<span class="keyword">self</span>)</div><div class="line">    &#123;</div><div class="line">        <span class="comment">// 多态性</span></div><div class="line">        [<span class="keyword">self</span> setUpSubViews];</div><div class="line">        [<span class="keyword">self</span> setUpConstraints];</div><div class="line">        [<span class="keyword">self</span> bindViewModel];</div><div class="line">        <span class="comment">// 共性定制</span></div><div class="line">        [<span class="keyword">self</span> setUpCommonness];</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="keyword">self</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="meta">#pragma mark - Inner Method</span></div><div class="line"></div><div class="line">- (<span class="keyword">void</span>)setUpCommonness</div><div class="line">&#123;</div><div class="line"></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="meta">#pragma mark - Override Method</span></div><div class="line"></div><div class="line">- (<span class="keyword">void</span>)setUpSubViews</div><div class="line">&#123;</div><div class="line">    </div><div class="line">&#125;</div><div class="line"></div><div class="line">- (<span class="keyword">void</span>)setUpConstraints</div><div class="line">&#123;</div><div class="line">    </div><div class="line">&#125;</div><div class="line"></div><div class="line">- (<span class="keyword">void</span>)bindViewModel</div><div class="line">&#123;</div><div class="line">    </div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">@end</span></div></pre></td></tr></table></figure>
+<p>代码很简单，但是要设计好基类，就需要了解继承和多态的特性。可以发现，在重写的初始化方法中，执行了协议中声明的是三个方法，以及一个内部方法</p>
+<ul>
+<li><strong>协议声明的方法</strong><br>由于基类实现了协议，所以需要实现方法，但是可以发现实现方法中没有任何代码，这是因为这些方法都是为多态性来准备的，来看看这几个方法的目的：设置子视图，设置子视图约束，设置事件绑定。不难知道，这类的方法的实现内容对于每个视图都不尽相同，所以基类只提供一个空壳，留给子类去重写。同时，这些方法在基类重写的初始化方法中执行，所以子类不用关系这几个方法的调用时机，只需要放心地关心业务逻辑即可。那么调用是在何时发生的呢？当子类初始化的时候，会调用基类的初始化方法，在基类的初始化方法中又会调用子类重写的这几个协议方法。</li>
+<li><strong>内部方法</strong><br>内部方法没有定义在协议或者是说头文件中，所以子类也无法去重写它，那么它的作用就是封装一些视图共性，不同的项目，可能会有不同的视图需求，那么将所有视图的共性抽出，封装在该方法即可。</li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;题目中引人注目的感叹号，在这句话的作用不是惊讶，而表达的是，应该这样做。为所有视图建立基类，利用继承和多态的特性，更好地约束视图类的代码和风格。&lt;br&gt;
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>上架Appstore背后的故事</title>
+    <link href="http://www.nineteen.me/2018/01/14/%E4%B8%8A%E6%9E%B6Appstore%E8%83%8C%E5%90%8E%E7%9A%84%E6%95%85%E4%BA%8B/"/>
+    <id>http://www.nineteen.me/2018/01/14/上架Appstore背后的故事/</id>
+    <published>2018-01-14T03:14:02.000Z</published>
+    <updated>2018-01-14T03:14:25.000Z</updated>
+    
+    <content type="html"><![CDATA[<h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>众说周知，iOS系统对第三方APP拥有很强力的控制权，有别于安卓系统上可以从任意地方下载，苹果保证了每一个安装在iOS系统中的APP都是经过官方认证的。那么在这表层现象的背后，引发我们的思考，苹果是如何保证认证。<br><a id="more"></a><br><img src="http://upload-images.jianshu.io/upload_images/2070409-2531630b9b0672e0.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<h4 id="准备知识：非对称加密"><a href="#准备知识：非对称加密" class="headerlink" title="准备知识：非对称加密"></a>准备知识：非对称加密</h4><h5 id="一、理论"><a href="#一、理论" class="headerlink" title="一、理论"></a>一、理论</h5><p>首先说到非对称加密，大家都熟知一个算法，RSA（又三位数学家名字首字母构成），这个算法中包含很多数学公式和理论证明，这里就不做深究。我们来简单地理解下非对称加密的思想。</p>
+<p>先来看看对称加密的过程，对称加密的双方都保持相同的加密密钥和解密密钥，数据经过加密密钥加密之后再网络中传输，对称加密最大的问题就是解密秘钥的如何安全传输。</p>
+<p>再来看看非对称加密，非对称加密有两个密钥，公钥和私钥，公钥公开，私钥私有。</p>
+<h5 id="二、非对称加密的例子"><a href="#二、非对称加密的例子" class="headerlink" title="二、非对称加密的例子"></a>二、非对称加密的例子</h5><ol>
+<li><strong>加密：</strong><br>A想要传输信息给B，那么B首先生成公钥和私钥，公钥发送给A，私钥保留，A收到B的公钥之后，将信息利用公钥加密，然后传输给B，B通过私钥解密。</li>
+<li><strong>防止篡改：</strong><br>B想要给A发送一个证明，那么B首先生成公钥和私钥，利用私钥加密证明生成加密文件，然后将证明和加密文件以及公钥一同发送给A，A收到之后，利用公钥将加密文件解密，然后对比证明，如果相同，则可以认为证明没有被篡改过。</li>
+</ol>
+<h4 id="苹果的数字签名"><a href="#苹果的数字签名" class="headerlink" title="苹果的数字签名"></a>苹果的数字签名</h4><p>苹果生成了一对密钥，公钥安装在每台iOS设备上，私钥保存在苹果后台服务器中，当APP上架到Appstore的时候，苹果后台用私钥对App进行签名（加密），当用户使用iOS设备下载App时，利用设备中的公钥验证签名，如果签名正确，那么可以认为该App是被官方认证的，同时也没有被修改过。</p>
+<p>上面的逻辑很通俗易懂，当然，这只是最简单的逻辑。考虑到很多实际情况，苹果制定了更为复杂的签名机制。</p>
+<h4 id="实际情况"><a href="#实际情况" class="headerlink" title="实际情况"></a>实际情况</h4><p>开发者可以直接把开发中的应用安装进手机进行调试</p>
+<h4 id="更复杂的签名机制"><a href="#更复杂的签名机制" class="headerlink" title="更复杂的签名机制"></a>更复杂的签名机制</h4><h5 id="一、签名"><a href="#一、签名" class="headerlink" title="一、签名"></a>一、签名</h5><ol>
+<li>首先在Mac机器中生成一对公钥和私钥，这里标记为公钥M，私钥M（M：Mac）</li>
+<li>同样苹果仍然持有一对密钥，公钥放在iOS设备上，私钥放在后台服务器，这里标记为公钥A，私钥A（A：Apple）</li>
+<li>签名：<ol>
+<li>将公钥M上传到后台服务器，通过私钥A进行签名，然后返回签名和公钥M，将其称为证书</li>
+<li>用私钥M对App签名</li>
+</ol>
+</li>
+<li>将以上两者内容打包，安装在手机上</li>
+</ol>
+<h5 id="二、验证"><a href="#二、验证" class="headerlink" title="二、验证"></a>二、验证</h5><ol>
+<li>首先利用设备中的公钥A对证书中的签名进行验证，确保公钥M是是认证过的</li>
+<li>然后利用公钥钥M对App签名进行验证，确保App是认证过的</li>
+</ol>
+<h4 id="更完善的策略设计"><a href="#更完善的策略设计" class="headerlink" title="更完善的策略设计"></a>更完善的策略设计</h4><p>以上是签名的大致过程，但是苹果还加了两个限制：</p>
+<ol>
+<li>只有在后台注册过的设备才能安装</li>
+<li>签名机制应该针对具体的某一App</li>
+</ol>
+<h4 id="完善的签名机制"><a href="#完善的签名机制" class="headerlink" title="完善的签名机制"></a>完善的签名机制</h4><p>#####做一些小调整</p>
+<ol>
+<li>在签名过程中，原来只讲私钥M上传后台服务器，现在需要将设备的IDs和AppID以及<code>Entitlements</code>（权限开关）也传入到后台服务器</li>
+<li>先利用私钥A签名得到证书，然后将证书和添加的信息打包后再用私钥签名（由一次签名变成两次签名，验证也从一次变成两次）</li>
+<li>在验证过程中，添加了两项验证：<ol>
+<li>用设备IDs验证iOS设备是否属于注册的设备范围</li>
+<li>用AppID验证App的ID是否对应</li>
+</ol>
+</li>
+</ol>
+<h4 id="概念与实际操作对应"><a href="#概念与实际操作对应" class="headerlink" title="概念与实际操作对应"></a>概念与实际操作对应</h4><h5 id="一、签名-1"><a href="#一、签名-1" class="headerlink" title="一、签名"></a>一、签名</h5><ol>
+<li>在<code>keychain</code>中选择“从证书颁发机构请求证书”，可以在本地生成一对公钥私钥，私钥保存在电脑中，公钥为生成的<code>CertificateSigningRequest</code></li>
+<li>iOS系统中保存一个公钥，苹果后台保存一个私钥</li>
+<li>签名：<ol>
+<li>将<code>CertificateSigningRequest</code>上传到服务器进行证书的申请，然后在网页上设置设备的IDs、AppID和<code>Entitlements</code>，配置完成后即可下载<code>Provisioning Profile</code>文件（该文件中包含证书、设备IDs、AppID、<code>Entitlements</code>）</li>
+<li>Xcode通过<code>Provisioning Profile</code>中的本地公钥可以找到对应的私钥（如果其他机器想要编译这个APP，则需要将私钥导出，为<code>.p12</code>文件），并签名该App，接着把<code>Provisioning Profile</code>文件命名为<code>embedded.mobileprovision</code>一同打包</li>
+</ol>
+</li>
+</ol>
+<h5 id="二、验证-1"><a href="#二、验证-1" class="headerlink" title="二、验证"></a>二、验证</h5><ol>
+<li>先用公钥验证证书和附加信息的包的签名，然后再验证证书的签名</li>
+<li>利用公钥验证App签名</li>
+<li>利用附加信息验证</li>
+</ol>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h4 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h4&gt;&lt;p&gt;众说周知，iOS系统对第三方APP拥有很强力的控制权，有别于安卓系统上可以从任意地方下载，苹果保证了每一个安装在iOS系统中的APP都是经过官方认证的。那么在这表层现象的背后，引发我们的思考，苹果是如何保证认证。&lt;br&gt;
+    
+    </summary>
+    
+    
+  </entry>
   
   <entry>
     <title>苹果如何在多尺寸屏中适配</title>

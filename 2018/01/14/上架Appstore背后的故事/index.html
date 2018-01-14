@@ -1,0 +1,63 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> 上架Appstore背后的故事 · Nineteen</title><meta name="description" content="上架Appstore背后的故事 - 郑祯"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/css/prontera.css"><link rel="search" type="application/opensearchdescription+xml" href="http://www.nineteen.me/atom.xml" title="Nineteen"></head><body><header class="feature-header"><nav class="component-nav"><ul><div class="logo-container"><a href="/"><h2 class="title">Nineteen</h2></a></div><a href="/" target="_self" class="li component-nav-item"><p>INDEX</p></a><a href="/archives" target="_self" class="li component-nav-item"><p>ARCHIVES</p></a><a href="/about" target="_self" class="li component-nav-item"><p>ME</p></a><ul class="shortcut-icons"><a href="http://www.jianshu.com/u/dd2dfc34332d" target="_blank"><img src="/images/jianshu.svg" class="icon"></a><a href="http://weibo.com/5458978084/profile?rightmod=1&amp;wvr=6&amp;mod=personinfo&amp;is_all=1" target="_blank"><img src="/images/weibo.svg" class="icon"></a><a href="https://github.com/NtZheng" target="_blank"><img src="/images/github.svg" class="icon"></a></ul></ul></nav></header><main class="container"><div id="post-container"><div class="post"><article class="post-block"><h1 class="post-title">上架Appstore背后的故事</h1><div class="post-info">Jan 14, 2018</div><div class="post-content"><h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>众说周知，iOS系统对第三方APP拥有很强力的控制权，有别于安卓系统上可以从任意地方下载，苹果保证了每一个安装在iOS系统中的APP都是经过官方认证的。那么在这表层现象的背后，引发我们的思考，苹果是如何保证认证。<br><a id="more"></a><br><img src="http://upload-images.jianshu.io/upload_images/2070409-2531630b9b0672e0.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<h4 id="准备知识：非对称加密"><a href="#准备知识：非对称加密" class="headerlink" title="准备知识：非对称加密"></a>准备知识：非对称加密</h4><h5 id="一、理论"><a href="#一、理论" class="headerlink" title="一、理论"></a>一、理论</h5><p>首先说到非对称加密，大家都熟知一个算法，RSA（又三位数学家名字首字母构成），这个算法中包含很多数学公式和理论证明，这里就不做深究。我们来简单地理解下非对称加密的思想。</p>
+<p>先来看看对称加密的过程，对称加密的双方都保持相同的加密密钥和解密密钥，数据经过加密密钥加密之后再网络中传输，对称加密最大的问题就是解密秘钥的如何安全传输。</p>
+<p>再来看看非对称加密，非对称加密有两个密钥，公钥和私钥，公钥公开，私钥私有。</p>
+<h5 id="二、非对称加密的例子"><a href="#二、非对称加密的例子" class="headerlink" title="二、非对称加密的例子"></a>二、非对称加密的例子</h5><ol>
+<li><strong>加密：</strong><br>A想要传输信息给B，那么B首先生成公钥和私钥，公钥发送给A，私钥保留，A收到B的公钥之后，将信息利用公钥加密，然后传输给B，B通过私钥解密。</li>
+<li><strong>防止篡改：</strong><br>B想要给A发送一个证明，那么B首先生成公钥和私钥，利用私钥加密证明生成加密文件，然后将证明和加密文件以及公钥一同发送给A，A收到之后，利用公钥将加密文件解密，然后对比证明，如果相同，则可以认为证明没有被篡改过。</li>
+</ol>
+<h4 id="苹果的数字签名"><a href="#苹果的数字签名" class="headerlink" title="苹果的数字签名"></a>苹果的数字签名</h4><p>苹果生成了一对密钥，公钥安装在每台iOS设备上，私钥保存在苹果后台服务器中，当APP上架到Appstore的时候，苹果后台用私钥对App进行签名（加密），当用户使用iOS设备下载App时，利用设备中的公钥验证签名，如果签名正确，那么可以认为该App是被官方认证的，同时也没有被修改过。</p>
+<p>上面的逻辑很通俗易懂，当然，这只是最简单的逻辑。考虑到很多实际情况，苹果制定了更为复杂的签名机制。</p>
+<h4 id="实际情况"><a href="#实际情况" class="headerlink" title="实际情况"></a>实际情况</h4><p>开发者可以直接把开发中的应用安装进手机进行调试</p>
+<h4 id="更复杂的签名机制"><a href="#更复杂的签名机制" class="headerlink" title="更复杂的签名机制"></a>更复杂的签名机制</h4><h5 id="一、签名"><a href="#一、签名" class="headerlink" title="一、签名"></a>一、签名</h5><ol>
+<li>首先在Mac机器中生成一对公钥和私钥，这里标记为公钥M，私钥M（M：Mac）</li>
+<li>同样苹果仍然持有一对密钥，公钥放在iOS设备上，私钥放在后台服务器，这里标记为公钥A，私钥A（A：Apple）</li>
+<li>签名：<ol>
+<li>将公钥M上传到后台服务器，通过私钥A进行签名，然后返回签名和公钥M，将其称为证书</li>
+<li>用私钥M对App签名</li>
+</ol>
+</li>
+<li>将以上两者内容打包，安装在手机上</li>
+</ol>
+<h5 id="二、验证"><a href="#二、验证" class="headerlink" title="二、验证"></a>二、验证</h5><ol>
+<li>首先利用设备中的公钥A对证书中的签名进行验证，确保公钥M是是认证过的</li>
+<li>然后利用公钥钥M对App签名进行验证，确保App是认证过的</li>
+</ol>
+<h4 id="更完善的策略设计"><a href="#更完善的策略设计" class="headerlink" title="更完善的策略设计"></a>更完善的策略设计</h4><p>以上是签名的大致过程，但是苹果还加了两个限制：</p>
+<ol>
+<li>只有在后台注册过的设备才能安装</li>
+<li>签名机制应该针对具体的某一App</li>
+</ol>
+<h4 id="完善的签名机制"><a href="#完善的签名机制" class="headerlink" title="完善的签名机制"></a>完善的签名机制</h4><p>#####做一些小调整</p>
+<ol>
+<li>在签名过程中，原来只讲私钥M上传后台服务器，现在需要将设备的IDs和AppID以及<code>Entitlements</code>（权限开关）也传入到后台服务器</li>
+<li>先利用私钥A签名得到证书，然后将证书和添加的信息打包后再用私钥签名（由一次签名变成两次签名，验证也从一次变成两次）</li>
+<li>在验证过程中，添加了两项验证：<ol>
+<li>用设备IDs验证iOS设备是否属于注册的设备范围</li>
+<li>用AppID验证App的ID是否对应</li>
+</ol>
+</li>
+</ol>
+<h4 id="概念与实际操作对应"><a href="#概念与实际操作对应" class="headerlink" title="概念与实际操作对应"></a>概念与实际操作对应</h4><h5 id="一、签名-1"><a href="#一、签名-1" class="headerlink" title="一、签名"></a>一、签名</h5><ol>
+<li>在<code>keychain</code>中选择“从证书颁发机构请求证书”，可以在本地生成一对公钥私钥，私钥保存在电脑中，公钥为生成的<code>CertificateSigningRequest</code></li>
+<li>iOS系统中保存一个公钥，苹果后台保存一个私钥</li>
+<li>签名：<ol>
+<li>将<code>CertificateSigningRequest</code>上传到服务器进行证书的申请，然后在网页上设置设备的IDs、AppID和<code>Entitlements</code>，配置完成后即可下载<code>Provisioning Profile</code>文件（该文件中包含证书、设备IDs、AppID、<code>Entitlements</code>）</li>
+<li>Xcode通过<code>Provisioning Profile</code>中的本地公钥可以找到对应的私钥（如果其他机器想要编译这个APP，则需要将私钥导出，为<code>.p12</code>文件），并签名该App，接着把<code>Provisioning Profile</code>文件命名为<code>embedded.mobileprovision</code>一同打包</li>
+</ol>
+</li>
+</ol>
+<h5 id="二、验证-1"><a href="#二、验证-1" class="headerlink" title="二、验证"></a>二、验证</h5><ol>
+<li>先用公钥验证证书和附加信息的包的签名，然后再验证证书的签名</li>
+<li>利用公钥验证App签名</li>
+<li>利用附加信息验证</li>
+</ol>
+</div></article></div><div id="disqus_thread"></div></div><script>var disqus_shortname = 'angrypowman';
+var disqus_identifier = '2018/01/14/上架Appstore背后的故事/';
+var disqus_title = '上架Appstore背后的故事';
+var disqus_url = 'http://www.nineteen.me/2018/01/14/上架Appstore背后的故事/';
+(function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();</script><script id="dsq-count-scr" src="//angrypowman.disqus.com/count.js" async></script></main><footer class="footer-container"><div class="paginator"><a href="/2018/01/14/为你的视图建立一个基类！/" class="prev">PREV</a><a href="/2018/01/14/苹果如何在多尺寸屏中适配/" class="next">NEXT</a></div><div class="copyright"><p>© 2017 - 2018 <a href="http://www.nineteen.me">郑祯</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/AngryPowman/hexo-theme-prontera" target="_blank">hexo-theme-prontera</a>.</p></div></footer><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"angrypowman",'auto');ga('send','pageview');</script></body></html>
